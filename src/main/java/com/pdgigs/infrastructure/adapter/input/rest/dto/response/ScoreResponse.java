@@ -1,4 +1,4 @@
-package com.pdgigs.infrastructure.adapter.input.rest.dto;
+package com.pdgigs.infrastructure.adapter.input.rest.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UploadScoreRequest {
+public class ScoreResponse {
+    private String id;
     private String title;
     private String author;
     private String musicalStyle;
+    private Long fileSize;
 }

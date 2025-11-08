@@ -1,4 +1,4 @@
-package com.pdgigs.infrastructure.adapter.input.rest.dto;
+package com.pdgigs.infrastructure.adapter.input.rest.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ErrorResponse {
-    private LocalDateTime timestamp;
-    private int status;
-    private String error;
     private String message;
-    private String path;
+    private int status;
+    private LocalDateTime timestamp;
 }
