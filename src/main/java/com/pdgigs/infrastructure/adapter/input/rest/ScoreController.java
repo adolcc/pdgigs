@@ -1,6 +1,6 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.application.port.in.UploadScoreUseCase;
+import com.pdgigs.application.port.input.UploadScoreUseCase;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.ScoreResponse;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
 import lombok.RequiredArgsConstructor;
