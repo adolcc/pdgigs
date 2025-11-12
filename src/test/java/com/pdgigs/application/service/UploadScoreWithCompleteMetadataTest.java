@@ -1,7 +1,7 @@
 package com.pdgigs.application.service;
 
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.domain.port.out.ScoreRepository;
+import com.pdgigs.domain.port.output.ScoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

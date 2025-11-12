@@ -4,7 +4,7 @@ import com.pdgigs.application.port.input.UploadScoreUseCase;
 import com.pdgigs.domain.exception.FileSizeExceededException;
 import com.pdgigs.domain.exception.InvalidFileFormatException;
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.domain.port.out.ScoreRepository;
+import com.pdgigs.domain.port.output.ScoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -14,8 +14,8 @@ import reactor.core.publisher.Mono;
 public class UploadScoreService implements UploadScoreUseCase {
 
     private final ScoreRepository scoreRepository;
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-    private static final byte[] PDF_SIGNATURE = {0x25, 0x50, 0x44, 0x46}; // %PDF
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final byte[] PDF_SIGNATURE = {0x25, 0x50, 0x44, 0x46};
 
     @Override
     public Mono<Score> uploadScore(byte[] pdfContent, String title, String author, String musicalStyle) {
@@ -41,7 +41,6 @@ public class UploadScoreService implements UploadScoreUseCase {
             throw new InvalidFileFormatException("File format not allowed");
         }
 
-        // Verificar que comience con %PDF
         for (int i = 0; i < PDF_SIGNATURE.length; i++) {
             if (content[i] != PDF_SIGNATURE[i]) {
                 throw new InvalidFileFormatException("File format not allowed");

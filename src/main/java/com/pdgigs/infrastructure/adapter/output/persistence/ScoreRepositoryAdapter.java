@@ -1,7 +1,7 @@
 package com.pdgigs.infrastructure.adapter.output.persistence;
 
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.domain.port.out.ScoreRepository;
+import com.pdgigs.domain.port.output.ScoreRepository;
 import com.pdgigs.infrastructure.adapter.output.persistence.entity.ScoreEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
