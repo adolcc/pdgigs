@@ -5,4 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface ScoreRepository {
     Mono<Score> save (Score score);
+
+    Mono<Score> findById(String id);
 }

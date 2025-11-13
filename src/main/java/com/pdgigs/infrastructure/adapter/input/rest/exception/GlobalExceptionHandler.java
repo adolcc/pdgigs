@@ -2,6 +2,7 @@ package com.pdgigs.infrastructure.adapter.input.rest.exception;
 
 import com.pdgigs.domain.exception.FileSizeExceededException;
 import com.pdgigs.domain.exception.InvalidFileFormatException;
+import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,21 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(ScoreNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleScoreNotFound(ScoreNotFoundException ex) {
+        log.error("Score not found error: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(errorResponse);
     }
 
