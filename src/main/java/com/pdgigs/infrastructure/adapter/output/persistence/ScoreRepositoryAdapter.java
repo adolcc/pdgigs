@@ -26,6 +26,11 @@ public class ScoreRepositoryAdapter implements ScoreRepository {
                 .map(this::toDomain);
     }
 
+    @Override
+    public Mono<Void> deleteById(String id) {
+        return mongoScoreRepository.deleteById(id);
+    }
+
     private ScoreEntity toEntity(Score score) {
         return ScoreEntity.builder()
                 .id(score.id())
