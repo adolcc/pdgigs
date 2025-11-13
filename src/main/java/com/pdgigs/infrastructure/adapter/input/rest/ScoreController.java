@@ -1,5 +1,6 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
+import com.pdgigs.application.port.input.DeleteScoreUseCase;
 import com.pdgigs.application.port.input.UploadScoreUseCase;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.ScoreResponse;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class ScoreController {
 
     private final UploadScoreUseCase uploadScoreUseCase;
+    private final DeleteScoreUseCase deleteScoreUseCase;
     private final ScoreRestMapper scoreRestMapper;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -42,6 +44,15 @@ public class ScoreController {
                 .map(scoreRestMapper::toResponse)
                 .doOnSuccess(response -> log.info("Score uploaded successfully with ID: {}", response.id()))
                 .doOnError(error -> log.error("Error uploading score", error));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteScore(@PathVariable String id) {
+        log.info("Received request to delete score with ID: {}", id);
+        return deleteScoreUseCase.deleteScore(id)
+                .doOnSuccess(unused -> log.info("Score with ID {} deleted successfully", id))
+                .doOnError(error -> log.error("Error deleting score with ID: {}", id, error));
     }
 
     private byte[] concatArrays(byte[] array1, byte[] array2) {

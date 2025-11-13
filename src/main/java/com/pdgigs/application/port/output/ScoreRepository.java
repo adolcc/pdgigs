@@ -7,4 +7,6 @@ public interface ScoreRepository {
     Mono<Score> save(Score score);
 
     Mono<Score> findById(String id);
+
+    Mono<Void> deleteById(String id);
 }
