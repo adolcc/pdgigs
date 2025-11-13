@@ -40,7 +40,7 @@ public class ScoreController {
                 .flatMap(pdfContent ->
                         uploadScoreUseCase.uploadScore(pdfContent, title, author, musicalStyle))
                 .map(scoreRestMapper::toResponse)
-                .doOnSuccess(response -> log.info("Score uploaded successfully with ID: {}", response.getId()))
+                .doOnSuccess(response -> log.info("Score uploaded successfully with ID: {}", response.id()))
                 .doOnError(error -> log.error("Error uploading score", error));
     }
 

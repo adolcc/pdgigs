@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
 
 import java.time.LocalDateTime;
 
@@ -15,15 +16,33 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(WebExchangeBindException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(WebExchangeBindException ex) {
+        String defaultMessage = ex.getBindingResult().getFieldError() != null
+                ? ex.getBindingResult().getFieldError().getDefaultMessage()
+                : "Validation error";
+        log.error("Validation error: {}", defaultMessage);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                defaultMessage,
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity
+                .badRequest()
+                .body(errorResponse);
+    }
+
     @ExceptionHandler(InvalidFileFormatException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileFormat(InvalidFileFormatException ex) {
         log.error("Invalid file format error: {}", ex.getMessage());
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
+                LocalDateTime.now()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
@@ -34,11 +53,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleFileSizeExceeded(FileSizeExceededException ex) {
         log.error("File size exceeded error: {}", ex.getMessage());
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                LocalDateTime.now()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.PAYLOAD_TOO_LARGE)
@@ -49,11 +68,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message("Internal server error")
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Internal server error",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                LocalDateTime.now()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

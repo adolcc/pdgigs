@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 public class ScoreRestMapper {
 
     public ScoreResponse toResponse(Score score) {
-        return ScoreResponse.builder()
-                .id(score.id())
-                .title(score.title())
-                .author(score.author())
-                .musicalStyle(score.musicalStyle())
-                .fileSize(score.fileSize())
-                .build();
+        return new ScoreResponse(
+                score.id(),
+                score.title(),
+                score.author(),
+                score.musicalStyle(),
+                score.fileSize()
+        );
     }
 }
