@@ -1,6 +1,7 @@
 package com.pdgigs.application.service;
 
 import com.pdgigs.application.port.output.ScoreRepository;
+import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.domain.model.Score;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,4 +57,25 @@ class GetScoreMetadataTest {
                 )
                 .verifyComplete();
     }
+
+    @Test
+    @DisplayName("Fallo 404: Partitura No Encontrada")
+    void givenScoreIdNotExists_whenMetadataIsRequested_thenThrowsScoreNotFoundException() {
+
+        final String NON_EXISTENT_ID = "P-99";
+
+        // GIVEN
+        when(scoreRepository.findById(NON_EXISTENT_ID))
+                .thenReturn(Mono.empty());
+
+        // WHEN
+        Mono<Score> resultMono = getScoreService.getMetadataById(NON_EXISTENT_ID);
+
+        // THEN
+        StepVerifier.create(resultMono)
+                .expectError(ScoreNotFoundException.class)
+                .verify();
+    }
+
+
 }
