@@ -22,23 +22,23 @@ public class ScoreRepositoryAdapter implements ScoreRepository {
 
     private ScoreEntity toEntity(Score score) {
         return ScoreEntity.builder()
-                .id(score.getId())
-                .title(score.getTitle())
-                .author(score.getAuthor())
-                .musicalStyle(score.getMusicalStyle())
-                .pdfContent(score.getPdfContent())
-                .fileSize(score.getFileSize())
+                .id(score.id())
+                .title(score.title())
+                .author(score.author())
+                .musicalStyle(score.musicalStyle())
+                .pdfContent(score.pdfContent())
+                .fileSize(score.fileSize())
                 .build();
     }
 
     private Score toDomain(ScoreEntity entity) {
-        return Score.builder()
-                .id(entity.getId())
-                .title(entity.getTitle())
-                .author(entity.getAuthor())
-                .musicalStyle(entity.getMusicalStyle())
-                .pdfContent(entity.getPdfContent())
-                .fileSize(entity.getFileSize())
-                .build();
+        return new Score(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getAuthor(),
+                entity.getMusicalStyle(),
+                entity.getPdfContent(),
+                entity.getFileSize()
+        );
     }
 }

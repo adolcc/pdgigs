@@ -36,12 +36,14 @@ class UploadScoreWithCompleteMetadataTest {
     void uploadScore_WithCompleteMetadata_ShouldSaveSuccessfully() {
         // GIVEN
         byte[] pdfContent = "fake-pdf-content".getBytes();
-        Score expectedScore = Score.builder()
-                .title("Concierto Nº 5")
-                .author("Mozart")
-                .musicalStyle("Clásico")
-                .pdfContent(validPdfContent)
-                .build();
+        Score expectedScore = new Score(
+                null,
+                "Concierto Nº 5",
+                "Mozart",
+                "Clásico",
+                validPdfContent,
+                (long) validPdfContent.length
+        );
 
         when(scoreRepository.save(any(Score.class)))
                 .thenReturn(Mono.just(expectedScore));
@@ -52,10 +54,10 @@ class UploadScoreWithCompleteMetadataTest {
         // THEN
         StepVerifier.create(result)
                 .expectNextMatches(score ->
-                        score.getTitle().equals("Concierto Nº 5") &&
-                                score.getAuthor().equals("Mozart") &&
-                                score.getMusicalStyle().equals("Clásico") &&
-                                score.getPdfContent() != null)
+                        score.title().equals("Concierto Nº 5") &&
+                                score.author().equals("Mozart") &&
+                                score.musicalStyle().equals("Clásico") &&
+                                score.pdfContent() != null)
                 .verifyComplete();
     }
 }

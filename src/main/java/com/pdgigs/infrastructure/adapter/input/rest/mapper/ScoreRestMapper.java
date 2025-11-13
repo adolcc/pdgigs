@@ -9,11 +9,11 @@ public class ScoreRestMapper {
 
     public ScoreResponse toResponse(Score score) {
         return ScoreResponse.builder()
-                .id(score.getId())
-                .title(score.getTitle())
-                .author(score.getAuthor())
-                .musicalStyle(score.getMusicalStyle())
-                .fileSize(score.getFileSize())
+                .id(score.id())
+                .title(score.title())
+                .author(score.author())
+                .musicalStyle(score.musicalStyle())
+                .fileSize(score.fileSize())
                 .build();
     }
 }

@@ -24,13 +24,14 @@ public class UploadScoreService implements UploadScoreUseCase {
                     validateFileFormat(content);
                     validateFileSize(content);
 
-                    Score score = Score.builder()
-                            .title(title != null ? title : "")
-                            .author(author != null ? author : "")
-                            .musicalStyle(musicalStyle != null ? musicalStyle : "")
-                            .pdfContent(content)
-                            .fileSize((long) content.length)
-                            .build();
+                    Score score = new Score(
+                            null,
+                            title != null ? title : "",
+                            author != null ? author : "",
+                            musicalStyle != null ? musicalStyle : "",
+                            content,
+                            (long) content.length
+                    );
 
                     return scoreRepository.save(score);
                 });

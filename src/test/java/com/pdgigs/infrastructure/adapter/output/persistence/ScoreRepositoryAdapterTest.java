@@ -50,24 +50,25 @@ class ScoreRepositoryAdapterTest {
     @DisplayName("Debe guardar partitura en MongoDB correctamente")
     void save_ShouldPersistScoreInMongoDB() {
         // GIVEN
-        Score score = Score.builder()
-                .title("Concierto Nº 5")
-                .author("Mozart")
-                .musicalStyle("Clásico")
-                .pdfContent(validPdfContent)
-                .fileSize((long) validPdfContent.length)
-                .build();
+        Score score = new Score(
+                null,
+                "Concierto Nº 5",
+                "Mozart",
+                "Clásico",
+                validPdfContent,
+                (long) validPdfContent.length
+        );
 
         // WHEN
         StepVerifier.create(scoreRepositoryAdapter.save(score))
                 // THEN
                 .assertNext(savedScore -> {
-                    assertThat(savedScore.getId()).isNotNull();
-                    assertThat(savedScore.getTitle()).isEqualTo("Concierto Nº 5");
-                    assertThat(savedScore.getAuthor()).isEqualTo("Mozart");
-                    assertThat(savedScore.getMusicalStyle()).isEqualTo("Clásico");
-                    assertThat(savedScore.getPdfContent()).isEqualTo(validPdfContent);
-                    assertThat(savedScore.getFileSize()).isEqualTo(validPdfContent.length);
+                    assertThat(savedScore.id()).isNotNull();
+                    assertThat(savedScore.title()).isEqualTo("Concierto Nº 5");
+                    assertThat(savedScore.author()).isEqualTo("Mozart");
+                    assertThat(savedScore.musicalStyle()).isEqualTo("Clásico");
+                    assertThat(savedScore.pdfContent()).isEqualTo(validPdfContent);
+                    assertThat(savedScore.fileSize()).isEqualTo((long) validPdfContent.length);
                 })
                 .verifyComplete();
     }
@@ -76,18 +77,19 @@ class ScoreRepositoryAdapterTest {
     @DisplayName("Debe generar ID automáticamente al guardar")
     void save_ShouldGenerateIdAutomatically() {
         // GIVEN
-        Score score = Score.builder()
-                .title("Test Score")
-                .author("")
-                .musicalStyle("")
-                .pdfContent(validPdfContent)
-                .fileSize((long) validPdfContent.length)
-                .build();
+        Score score = new Score(
+                null,
+                "Test Score",
+                "",
+                "",
+                validPdfContent,
+                (long) validPdfContent.length
+        );
 
         // WHEN & THEN
         StepVerifier.create(scoreRepositoryAdapter.save(score))
                 .assertNext(savedScore ->
-                        assertThat(savedScore.getId()).isNotEmpty())
+                        assertThat(savedScore.id()).isNotEmpty())
                 .verifyComplete();
     }
 }

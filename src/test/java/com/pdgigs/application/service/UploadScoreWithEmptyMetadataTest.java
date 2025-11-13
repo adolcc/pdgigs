@@ -36,12 +36,14 @@ class UploadScoreWithEmptyMetadataTest {
     void uploadScore_WithEmptyMetadata_ShouldSaveSuccessfully() {
         // GIVEN
         byte[] pdfContent = "fake-pdf-content".getBytes();
-        Score expectedScore = Score.builder()
-                .title("")
-                .author("")
-                .musicalStyle("")
-                .pdfContent(validPdfContent)
-                .build();
+        Score expectedScore = new Score(
+                null,
+                "",
+                "",
+                "",
+                validPdfContent,
+                (long) validPdfContent.length
+        );
 
         when(scoreRepository.save(any(Score.class)))
                 .thenReturn(Mono.just(expectedScore));
@@ -52,10 +54,10 @@ class UploadScoreWithEmptyMetadataTest {
         // THEN
         StepVerifier.create(result)
                 .expectNextMatches(score ->
-                        score.getTitle().equals("") &&
-                                score.getAuthor().equals("") &&
-                                score.getMusicalStyle().equals("") &&
-                                score.getPdfContent() != null)
+                        score.title().equals("") &&
+                                score.author().equals("") &&
+                                score.musicalStyle().equals("") &&
+                                score.pdfContent() != null)
                 .verifyComplete();
     }
 }
