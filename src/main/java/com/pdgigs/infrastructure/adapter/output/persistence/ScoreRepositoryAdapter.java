@@ -20,6 +20,12 @@ public class ScoreRepositoryAdapter implements ScoreRepository {
                 .map(this::toDomain);
     }
 
+    @Override
+    public Mono<Score> findById(String id) {
+        return mongoScoreRepository.findById(id)
+                .map(this::toDomain);
+    }
+
     private ScoreEntity toEntity(Score score) {
         return ScoreEntity.builder()
                 .id(score.id())
