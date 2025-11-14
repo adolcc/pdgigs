@@ -1,8 +1,8 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.application.port.output.ScoreRepository;
 import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.domain.model.Score;
+import com.pdgigs.domain.port.output.ScoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

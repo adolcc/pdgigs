@@ -1,6 +1,6 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.application.port.input.UploadScoreUseCase;
+import com.pdgigs.domain.port.input.UploadScoreUseCase;
 import com.pdgigs.domain.exception.FileSizeExceededException;
 import com.pdgigs.domain.exception.InvalidFileFormatException;
 import com.pdgigs.domain.model.Score;

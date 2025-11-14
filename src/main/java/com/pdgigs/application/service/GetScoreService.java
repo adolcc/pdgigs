@@ -1,9 +1,9 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.application.port.input.GetScoreMetadataUseCase;
-import com.pdgigs.application.port.output.ScoreRepository;
+import com.pdgigs.domain.port.input.GetScoreMetadataUseCase;
 import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.domain.model.Score;
+import com.pdgigs.domain.port.output.ScoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;

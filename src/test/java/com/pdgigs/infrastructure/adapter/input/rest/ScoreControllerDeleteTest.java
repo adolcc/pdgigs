@@ -1,6 +1,6 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.application.port.input.DeleteScoreUseCase;
+import com.pdgigs.domain.port.input.DeleteScoreUseCase;
 import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
 import com.pdgigs.infrastructure.config.SecurityConfig;

@@ -1,6 +1,6 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.application.port.input.UpdateScoreUseCase;
+import com.pdgigs.domain.port.input.UpdateScoreUseCase;
 import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.domain.model.Score;
 import com.pdgigs.domain.port.output.ScoreRepository;
