@@ -5,7 +5,6 @@ import com.pdgigs.infrastructure.adapter.input.rest.dto.request.UpdateScoreReque
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
 import com.pdgigs.infrastructure.config.SecurityConfig;
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.infrastructure.adapter.input.rest.helper.PdfContentFactory;
 import com.pdgigs.infrastructure.adapter.input.rest.helper.ScoreMockFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(ScoreController.class)
+@WebFluxTest(ScoreControllerUpdate.class)
 @Import({ScoreRestMapper.class, SecurityConfig.class})
 @DisplayName("Controller: actualización de metadata")
 class ScoreControllerUpdateTest {
@@ -33,8 +32,7 @@ class ScoreControllerUpdateTest {
     @Test
     @DisplayName("PATCH /api/scores/{id} - Actualización parcial (título)")
     void patch_UpdateTitleOnly() {
-        byte[] pdfContent = PdfContentFactory.createValidPdfContent();
-        Score updated = ScoreMockFactory.createWithPartialMetadata("1", "Concierto");
+        Score updated = ScoreMockFactory.create("1", "Concierto", "Bach", "Barroco");
 
         when(updateScoreUseCase.updateMetadata("1", "Concierto", null, null))
                 .thenReturn(Mono.just(updated));

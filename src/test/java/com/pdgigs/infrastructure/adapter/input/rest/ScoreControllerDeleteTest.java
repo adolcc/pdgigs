@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(ScoreController.class)
+@WebFluxTest(ScoreControllerDelete.class)
 @Import({ScoreRestMapper.class, SecurityConfig.class})
 @DisplayName("Controller: Eliminación de partituras")
 class ScoreControllerDeleteTest {

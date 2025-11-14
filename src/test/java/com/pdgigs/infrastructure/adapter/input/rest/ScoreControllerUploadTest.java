@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(ScoreController.class)
+@WebFluxTest(ScoreControllerUpload.class)
 @Import({ScoreRestMapper.class, SecurityConfig.class})
 @DisplayName("Controller: Subida exitosa de partituras")
 public class ScoreControllerUploadTest {
