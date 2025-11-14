@@ -1,4 +1,4 @@
-package com.pdgigs.application.port.input;
+package com.pdgigs.domain.port.input;
 
 import reactor.core.publisher.Mono;
 

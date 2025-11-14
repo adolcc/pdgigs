@@ -1,4 +1,4 @@
-package com.pdgigs.application.port.input;
+package com.pdgigs.domain.port.input;
 
 import com.pdgigs.domain.model.Score;
 import reactor.core.publisher.Mono;

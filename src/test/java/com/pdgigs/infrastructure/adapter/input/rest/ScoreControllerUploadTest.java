@@ -1,6 +1,6 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.application.port.input.UploadScoreUseCase;
+import com.pdgigs.domain.port.input.UploadScoreUseCase;
 import com.pdgigs.infrastructure.adapter.input.rest.helper.MultipartRequestFactory;
 import com.pdgigs.infrastructure.adapter.input.rest.helper.ScoreMockFactory;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: pdgigs-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: pdgigs
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - pdgigs-network
+
+  pdgigs-app:
+    build: .
+    container_name: pdgigs-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/pdgigs
+      SPRING_DATA_MONGODB_DATABASE: pdgigs
+    depends_on:
+      - mongodb
+    networks:
+      - pdgigs-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  pdgigs-network:
+    driver: bridge

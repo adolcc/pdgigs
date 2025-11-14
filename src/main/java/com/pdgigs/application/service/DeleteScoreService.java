@@ -1,8 +1,8 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.application.port.input.DeleteScoreUseCase;
-import com.pdgigs.application.port.output.ScoreRepository;
+import com.pdgigs.domain.port.input.DeleteScoreUseCase;
 import com.pdgigs.domain.exception.ScoreNotFoundException;
+import com.pdgigs.domain.port.output.ScoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
