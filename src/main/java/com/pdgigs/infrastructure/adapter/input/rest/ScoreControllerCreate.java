@@ -1,6 +1,6 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.domain.port.input.UploadScoreUseCase;
+import com.pdgigs.domain.port.input.CreateScoreUseCase;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.ScoreResponse;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,9 +23,9 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
 @Tag(name = "Score Upload", description = "Endpoints para subir partituras")
-public class ScoreControllerUpload {
+public class ScoreControllerCreate {
 
-    private final UploadScoreUseCase uploadScoreUseCase;
+    private final CreateScoreUseCase createScoreUseCase;
     private final ScoreRestMapper scoreRestMapper;
 
     @Operation(
@@ -35,12 +35,13 @@ public class ScoreControllerUpload {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Partitura subida exitosamente",
                     content = @Content(schema = @Schema(implementation = ScoreResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "415", description = "Formato de archivo no válido (debe ser PDF)"),
             @ApiResponse(responseCode = "413", description = "El archivo excede el tamaño máximo permitido (10MB)")
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ScoreResponse> uploadScore(
+    public Mono<ScoreResponse> createScore(
             @Parameter(description = "Archivo PDF de la partitura", required = true)
             @RequestPart("file") FilePart file,
 
@@ -63,7 +64,7 @@ public class ScoreControllerUpload {
                 })
                 .reduce(new byte[0], this::concatArrays)
                 .flatMap(pdfContent ->
-                        uploadScoreUseCase.uploadScore(pdfContent, title, author, musicalStyle))
+                        createScoreUseCase.createScore(pdfContent, title, author, musicalStyle))
                 .map(scoreRestMapper::toResponse)
                 .doOnSuccess(response -> log.info("Score uploaded successfully with ID: {}", response.id()))
                 .doOnError(error -> log.error("Error uploading score", error));

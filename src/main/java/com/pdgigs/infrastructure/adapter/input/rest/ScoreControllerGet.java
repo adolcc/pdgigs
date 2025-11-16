@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
 @Tag(name = "Score Query", description = "Endpoints para consultar información de partituras")
-public class ScoreControllerQuery {
+public class ScoreControllerGet {
 
     private final GetScoreMetadataUseCase getScoreMetadataUseCase;
     private final ScoreRestMapper scoreRestMapper;

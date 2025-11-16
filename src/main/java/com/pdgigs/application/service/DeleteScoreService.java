@@ -1,8 +1,9 @@
 package com.pdgigs.application.service;
 
+import com.pdgigs.domain.exception.ResourceNotFoundException;
 import com.pdgigs.domain.port.input.DeleteScoreUseCase;
-import com.pdgigs.domain.exception.ScoreNotFoundException;
 import com.pdgigs.domain.port.output.ScoreRepository;
+import com.pdgigs.domain.validator.ScoreValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,18 +18,17 @@ public class DeleteScoreService implements DeleteScoreUseCase {
 
     @Override
     public Mono<Void> deleteScore(String scoreId) {
-        log.info("Attempting to delete score with ID: {}", scoreId);
+        log.debug("Attempting to delete score with ID: {}", scoreId);
 
-        return scoreRepository.findById(scoreId)
-                .switchIfEmpty(Mono.error(
-                        new ScoreNotFoundException("Score with ID " + scoreId + " not found.")
-                ))
+        return ScoreValidator.validateScoreId(scoreId)
+                .then(scoreRepository.findById(scoreId))
+                .switchIfEmpty(Mono.error(ResourceNotFoundException.score(scoreId)))
                 .flatMap(score -> {
-                    log.info("Score found. Deleting score with ID: {} and PDF content of size: {} bytes",
+                    log.debug("Score found. Deleting score with ID: {} (PDF size: {} bytes)",
                             scoreId, score.pdfContent().length);
                     return scoreRepository.deleteById(scoreId);
                 })
-                .doOnSuccess(unused -> log.info("Score with ID {} deleted successfully", scoreId))
-                .doOnError(error -> log.error("Error deleting score with ID: {}", scoreId, error));
+                .doOnSuccess(unused -> log.info("Score deleted successfully: {}", scoreId))
+                .doOnError(error -> log.error("Error deleting score: {}", scoreId, error));
     }
 }
