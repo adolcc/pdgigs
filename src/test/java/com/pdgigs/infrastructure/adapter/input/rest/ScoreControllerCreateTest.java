@@ -1,12 +1,12 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.domain.exception.validation.FileValidationError;
-import com.pdgigs.domain.exception.validation.ValidationException;
+import com.pdgigs.domain.model.Score;
 import com.pdgigs.domain.port.input.CreateScoreUseCase;
 import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.DomainExceptionHandler;
 import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.GlobalFallbackHandler;
 import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.ValidationExceptionHandler;
 import com.pdgigs.infrastructure.adapter.input.rest.helper.MultipartRequestFactory;
+import com.pdgigs.infrastructure.adapter.input.rest.helper.ScoreMockFactory;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
 import com.pdgigs.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -23,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(ScoreControllerCreate.class)
@@ -33,8 +33,10 @@ import static org.mockito.Mockito.when;
         ValidationExceptionHandler.class,
         GlobalFallbackHandler.class
 })
-@DisplayName("Controller: Validaciones de formato y tamaño")
-class ScoreControllerValidationTest {
+@DisplayName("Controller: Creación de partituras")
+class ScoreControllerCreateTest {
+
+    private static final String SCORE_ID = "507f1f77bcf86cd799439011";
 
     @Autowired
     private WebTestClient webTestClient;
@@ -43,70 +45,69 @@ class ScoreControllerValidationTest {
     private CreateScoreUseCase createScoreUseCase;
 
     @Test
-    @DisplayName("POST /api/scores - Archivo no PDF → 415")
-    void uploadScore_InvalidFormat_Returns415() {
+    @DisplayName("POST /api/scores - Metadata completa → 201")
+    void createScore_CompleteMetadata_Returns201() {
         // GIVEN
-        ValidationException validationException = new FileValidationError.InvalidFormat().toException();
+        Score mockScore = ScoreMockFactory.createWithCompleteMetadata(SCORE_ID);
 
         when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString()))
-                .thenReturn(Mono.error(validationException));
+                .thenReturn(Mono.just(mockScore));
 
         // WHEN & THEN
         webTestClient.post()
                 .uri("/api/scores")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(
-                        MultipartRequestFactory.createWithInvalidFormat().build()))
+                        MultipartRequestFactory.createWithCompleteMetadata().build()))
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(415)
-                .jsonPath("$.errorCode").isEqualTo("VALIDATION_ERROR");
+                .jsonPath("$.id").isEqualTo(SCORE_ID)
+                .jsonPath("$.title").isNotEmpty()
+                .jsonPath("$.author").isNotEmpty()
+                .jsonPath("$.musicalStyle").isNotEmpty()
+                .jsonPath("$.fileSize").isNumber();
+
+        verify(createScoreUseCase).createScore(any(byte[].class), anyString(), anyString(), anyString());
     }
 
     @Test
-    @DisplayName("POST /api/scores - Archivo >10MB → 413")
-    void uploadScore_FileTooLarge_Returns413() {
+    @DisplayName("POST /api/scores - Solo título → 201")
+    void createScore_OnlyTitle_Returns201() {
         // GIVEN
-        long actualSize = 11 * 1024 * 1024;
-        long maxSize = 10 * 1024 * 1024;
-        ValidationException validationException = new FileValidationError.SizeExceeded(actualSize, maxSize).toException();
+        Score mockScore = ScoreMockFactory.create(SCORE_ID, "Solo Título", "", "");
 
         when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString()))
-                .thenReturn(Mono.error(validationException));
+                .thenReturn(Mono.just(mockScore));
 
         // WHEN & THEN
         webTestClient.post()
                 .uri("/api/scores")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(
-                        MultipartRequestFactory.createWithLargeFile().build()))
+                        MultipartRequestFactory.createWithCompleteMetadata().build()))
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE)
-                .expectBody()
-                .jsonPath("$.status").isEqualTo(413)
-                .jsonPath("$.errorCode").isEqualTo("VALIDATION_ERROR");
+                .expectStatus().isCreated();
     }
 
     @Test
-    @DisplayName("POST /api/scores - Archivo vacío → 400")
-    void uploadScore_EmptyFile_Returns400() {
+    @DisplayName("POST /api/scores - Sin metadata → 201")
+    void createScore_NoMetadata_Returns201() {
         // GIVEN
-        ValidationException validationException = new FileValidationError.Empty().toException();
+        Score mockScore = ScoreMockFactory.create(SCORE_ID, "", "", "");
 
         when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString()))
-                .thenReturn(Mono.error(validationException));
+                .thenReturn(Mono.just(mockScore));
 
         // WHEN & THEN
         webTestClient.post()
                 .uri("/api/scores")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(
-                        MultipartRequestFactory.createWithEmptyFile().build()))
+                        MultipartRequestFactory.createWithCompleteMetadata().build()))
                 .exchange()
-                .expectStatus().isBadRequest()
+                .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.status").isEqualTo(400)
-                .jsonPath("$.errorCode").isEqualTo("VALIDATION_ERROR");
+                .jsonPath("$.id").isEqualTo(SCORE_ID);
     }
 }

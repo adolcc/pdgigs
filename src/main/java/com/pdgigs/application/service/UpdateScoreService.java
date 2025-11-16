@@ -1,13 +1,16 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.domain.port.input.UpdateScoreUseCase;
-import com.pdgigs.domain.exception.ScoreNotFoundException;
+import com.pdgigs.domain.exception.ResourceNotFoundException;
 import com.pdgigs.domain.model.Score;
+import com.pdgigs.domain.port.input.UpdateScoreUseCase;
 import com.pdgigs.domain.port.output.ScoreRepository;
+import com.pdgigs.domain.validator.ScoreValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UpdateScoreService implements UpdateScoreUseCase {
@@ -15,25 +18,24 @@ public class UpdateScoreService implements UpdateScoreUseCase {
     private final ScoreRepository scoreRepository;
 
     @Override
-    public Mono<Score> updateMetadata(String id, String title, String author, String musicalStyle) {
-        return scoreRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ScoreNotFoundException("Score not found: " + id)))
+    public Mono<Score> updateMetadata(String scoreId, String title, String author, String musicalStyle) {
+        log.debug("Updating metadata for score ID: {}", scoreId);
+
+        return ScoreValidator.validateScoreId(scoreId)
+                .then(ScoreValidator.validateMetadata(title, author, musicalStyle))
+                .then(scoreRepository.findById(scoreId))
+                .switchIfEmpty(Mono.error(ResourceNotFoundException.score(scoreId)))
                 .flatMap(existing -> {
-
-                    String newTitle = title != null ? title : existing.title();
-                    String newAuthor = author != null ? author : existing.author();
-                    String newMusicalStyle = musicalStyle != null ? musicalStyle : existing.musicalStyle();
-
                     Score updated = new Score(
                             existing.id(),
-                            newTitle,
-                            newAuthor,
-                            newMusicalStyle,
+                            title != null ? title : existing.title(),
+                            author != null ? author : existing.author(),
+                            musicalStyle != null ? musicalStyle : existing.musicalStyle(),
                             existing.pdfContent(),
                             existing.fileSize()
                     );
-
                     return scoreRepository.save(updated);
-                });
+                })
+                .doOnSuccess(score -> log.info("Metadata updated for score: {}", scoreId));
     }
 }

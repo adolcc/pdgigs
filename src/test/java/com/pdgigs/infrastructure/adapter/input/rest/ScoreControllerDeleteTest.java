@@ -1,7 +1,9 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
+import com.pdgigs.domain.exception.ResourceNotFoundException;
 import com.pdgigs.domain.port.input.DeleteScoreUseCase;
-import com.pdgigs.domain.exception.ScoreNotFoundException;
+import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.DomainExceptionHandler;
+import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.GlobalFallbackHandler;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
 import com.pdgigs.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +15,21 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(ScoreControllerDelete.class)
-@Import({ScoreRestMapper.class, SecurityConfig.class})
+@Import({
+        ScoreRestMapper.class,
+        SecurityConfig.class,
+        DomainExceptionHandler.class,
+        GlobalFallbackHandler.class
+})
 @DisplayName("Controller: Eliminación de partituras")
 class ScoreControllerDeleteTest {
+
+    private static final String SCORE_ID = "507f1f77bcf86cd799439011";
+    private static final String NON_EXISTENT_ID = "507f1f77bcf86cd799439099";
 
     @Autowired
     private WebTestClient webTestClient;
@@ -27,35 +38,56 @@ class ScoreControllerDeleteTest {
     private DeleteScoreUseCase deleteScoreUseCase;
 
     @Test
-    @DisplayName("DELETE /api/scores/{id} - Debe eliminar partitura exitosamente")
-    void deleteScore_WhenScoreExists_ShouldReturn204() {
+    @DisplayName("DELETE /api/scores/{id} - Partitura existe → 204")
+    void deleteScore_ScoreExists_Returns204() {
         // GIVEN
-        String scoreId = "P-55";
-        when(deleteScoreUseCase.deleteScore(scoreId)).thenReturn(Mono.empty());
+        when(deleteScoreUseCase.deleteScore(SCORE_ID))
+                .thenReturn(Mono.empty());
 
         // WHEN & THEN
         webTestClient.delete()
-                .uri("/api/scores/{id}", scoreId)
+                .uri("/api/scores/{id}", SCORE_ID)
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
+
+        verify(deleteScoreUseCase).deleteScore(SCORE_ID);
     }
 
     @Test
-    @DisplayName("DELETE /api/scores/{id} - Debe retornar 404 cuando la partitura no existe")
-    void deleteScore_WhenScoreNotFound_ShouldReturn404() {
+    @DisplayName("DELETE /api/scores/{id} - Partitura no existe → 404")
+    void deleteScore_ScoreNotFound_Returns404() {
         // GIVEN
-        String scoreId = "P-99";
-        when(deleteScoreUseCase.deleteScore(scoreId))
-                .thenReturn(Mono.error(new ScoreNotFoundException("Score with ID P-99 not found.")));
+        when(deleteScoreUseCase.deleteScore(NON_EXISTENT_ID))
+                .thenReturn(Mono.error(ResourceNotFoundException.score(NON_EXISTENT_ID)));
 
         // WHEN & THEN
         webTestClient.delete()
-                .uri("/api/scores/{id}", scoreId)
+                .uri("/api/scores/{id}", NON_EXISTENT_ID)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Score with ID P-99 not found.")
-                .jsonPath("$.status").isEqualTo(404);
+                .jsonPath("$.message").value(msg ->
+                        msg.toString().contains("Score not found with ID: " + NON_EXISTENT_ID))
+                .jsonPath("$.status").isEqualTo(404)
+                .jsonPath("$.errorCode").isEqualTo("RESOURCE_NOT_FOUND");
+
+        verify(deleteScoreUseCase).deleteScore(NON_EXISTENT_ID);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/scores/{id} - Error interno → 500")
+    void deleteScore_InternalError_Returns500() {
+        // GIVEN
+        when(deleteScoreUseCase.deleteScore(SCORE_ID))
+                .thenReturn(Mono.error(new RuntimeException("Database connection lost")));
+
+        // WHEN & THEN
+        webTestClient.delete()
+                .uri("/api/scores/{id}", SCORE_ID)
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+        verify(deleteScoreUseCase).deleteScore(SCORE_ID);
     }
 }

@@ -7,6 +7,4 @@ public record Score(
         String musicalStyle,
         byte[]pdfContent,
         Long fileSize
-) {
-    // constructores y métodos de validación de negocio.
-}
+) { }
