@@ -1,10 +1,11 @@
 package com.pdgigs.domain.exception.validation;
 
 public sealed interface UserValidationError
-        permits UserValidationError.InvalidEmail,
-        UserValidationError.EmailRequired,
-        UserValidationError.PasswordTooShort,
+        permits UserValidationError.EmailRequired,
+        UserValidationError.InvalidEmail,
+        UserValidationError.EmailAlreadyExists,
         UserValidationError.PasswordRequired,
+        UserValidationError.PasswordTooShort,
         UserValidationError.InvalidCredentials {
 
     String field();
@@ -12,18 +13,6 @@ public sealed interface UserValidationError
 
     default ValidationException toException() {
         return new ValidationException(field(), message());
-    }
-
-    record InvalidEmail() implements UserValidationError {
-        @Override
-        public String field() {
-            return "email";
-        }
-
-        @Override
-        public String message() {
-            return "Invalid email format";
-        }
     }
 
     record EmailRequired() implements UserValidationError {
@@ -38,15 +27,27 @@ public sealed interface UserValidationError
         }
     }
 
-    record PasswordTooShort() implements UserValidationError {
+    record InvalidEmail() implements UserValidationError {
         @Override
         public String field() {
-            return "password";
+            return "email";
         }
 
         @Override
         public String message() {
-            return "Password must be at least 8 characters";
+            return "Invalid email format";
+        }
+    }
+
+    record EmailAlreadyExists(String email) implements UserValidationError {
+        @Override
+        public String field() {
+            return "email";
+        }
+
+        @Override
+        public String message() {
+            return String.format("Email already exists: %s", email);
         }
     }
 
@@ -59,6 +60,18 @@ public sealed interface UserValidationError
         @Override
         public String message() {
             return "Password is required";
+        }
+    }
+
+    record PasswordTooShort() implements UserValidationError {
+        @Override
+        public String field() {
+            return "password";
+        }
+
+        @Override
+        public String message() {
+            return "Password must be at least 8 characters long";
         }
     }
 

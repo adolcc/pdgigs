@@ -3,19 +3,15 @@ package com.pdgigs.infrastructure.adapter.input.rest;
 import com.pdgigs.domain.exception.validation.FileValidationError;
 import com.pdgigs.domain.exception.validation.ValidationException;
 import com.pdgigs.domain.port.input.CreateScoreUseCase;
-import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.DomainExceptionHandler;
-import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.GlobalFallbackHandler;
-import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.ValidationExceptionHandler;
 import com.pdgigs.infrastructure.adapter.input.rest.helper.MultipartRequestFactory;
-import com.pdgigs.infrastructure.adapter.input.rest.mapper.ScoreRestMapper;
-import com.pdgigs.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -25,16 +21,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(ScoreControllerCreate.class)
-@Import({
-        ScoreRestMapper.class,
-        SecurityConfig.class,
-        DomainExceptionHandler.class,
-        ValidationExceptionHandler.class,
-        GlobalFallbackHandler.class
-})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
 @DisplayName("Controller: Validaciones de formato y tamaño")
-class ScoreControllerValidationTest {
+class ScoreControllerValidationIT {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -43,6 +33,7 @@ class ScoreControllerValidationTest {
     private CreateScoreUseCase createScoreUseCase;
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("POST /api/scores - Archivo no PDF → 415")
     void uploadScore_InvalidFormat_Returns415() {
         // GIVEN
@@ -65,6 +56,7 @@ class ScoreControllerValidationTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("POST /api/scores - Archivo >10MB → 413")
     void uploadScore_FileTooLarge_Returns413() {
         // GIVEN
@@ -89,6 +81,7 @@ class ScoreControllerValidationTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("POST /api/scores - Archivo vacío → 400")
     void uploadScore_EmptyFile_Returns400() {
         // GIVEN
@@ -108,5 +101,18 @@ class ScoreControllerValidationTest {
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(400)
                 .jsonPath("$.errorCode").isEqualTo("VALIDATION_ERROR");
+    }
+
+    @Test
+    @DisplayName("POST /api/scores - Sin autenticación → 401")
+    void uploadScore_NotAuthenticated_Returns401() {
+        // WHEN & THEN (sin @WithMockUser)
+        webTestClient.post()
+                .uri("/api/scores")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(
+                        MultipartRequestFactory.createValidRequest().build()))
+                .exchange()
+                .expectStatus().isUnauthorized();
     }
 }

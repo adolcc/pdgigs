@@ -19,23 +19,23 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
-@Tag(name = "Score Download", description = "Endpoints para descargar partituras")
+@Tag(name = "Score Download", description = "Endpoint to download scores")
 public class ScoreControllerDownload {
 
     private final GetScorePdfUseCase getScorePdfUseCase;
 
     @Operation(
-            summary = "Descargar PDF de una partitura",
-            description = "Descarga el archivo PDF de una partitura por su ID"
+            summary = "Download PDF of sheet music",
+            description = "Download the PDF file of a score using its ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "PDF descargado exitosamente",
+            @ApiResponse(responseCode = "200", description = "PDF downloaded successfully",
                     content = @Content(mediaType = MediaType.APPLICATION_PDF_VALUE)),
-            @ApiResponse(responseCode = "404", description = "Partitura no encontrada")
+            @ApiResponse(responseCode = "404", description = "Score not found")
     })
     @GetMapping("/{id}/download")
     public Mono<ResponseEntity<byte[]>> downloadScorePdf(
-            @Parameter(description = "ID de la partitura", required = true, example = "674b8e1234567890abcdef12")
+            @Parameter(description = "Score ID", required = true, example = "674b8e1234567890abcdef12")
             @PathVariable String id
     ) {
         log.info("Downloading PDF for score with ID: {}", id);

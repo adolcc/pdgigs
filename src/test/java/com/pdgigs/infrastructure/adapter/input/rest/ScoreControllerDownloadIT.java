@@ -1,19 +1,17 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
+import com.pdgigs.config.TestWebClientConfig;
 import com.pdgigs.domain.exception.ResourceNotFoundException;
 import com.pdgigs.domain.port.input.GetScorePdfUseCase;
-import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.DomainExceptionHandler;
-import com.pdgigs.infrastructure.adapter.input.rest.exception.handler.GlobalFallbackHandler;
 import com.pdgigs.infrastructure.adapter.input.rest.helper.PdfContentFactory;
-import com.pdgigs.infrastructure.config.SecurityConfig;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -22,38 +20,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(ScoreControllerDownload.class)
-@Import({
-        SecurityConfig.class,
-        DomainExceptionHandler.class,
-        GlobalFallbackHandler.class
-})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
+@Import(TestWebClientConfig.class)
 @DisplayName("Controller: Descarga de partituras PDF")
-class ScoreControllerDownloadTest {
+class ScoreControllerDownloadIT {
 
     private static final String SCORE_ID = "507f1f77bcf86cd799439011";
     private static final String NON_EXISTENT_ID = "507f1f77bcf86cd799439099";
 
-    private WebTestClient webTestClient;
-
     @Autowired
-    private ApplicationContext applicationContext;
+    private WebTestClient webTestClient;
 
     @MockitoBean
     private GetScorePdfUseCase getScorePdfUseCase;
 
-    @BeforeEach
-    void setUp() {
-        webTestClient = WebTestClient
-                .bindToApplicationContext(applicationContext)
-                .configureClient()
-                .codecs(configurer -> configurer
-                        .defaultCodecs()
-                        .maxInMemorySize(20 * 1024 * 1024))
-                .build();
-    }
-
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("GET /api/scores/{id}/download - PDF existe → 200 con contenido")
     void downloadScorePdf_PdfExists_Returns200WithContent() {
         // GIVEN
@@ -78,6 +61,7 @@ class ScoreControllerDownloadTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("GET /api/scores/{id}/download - Partitura no existe → 404")
     void downloadScorePdf_ScoreNotFound_Returns404() {
         // GIVEN
@@ -99,6 +83,7 @@ class ScoreControllerDownloadTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("GET /api/scores/{id}/download - PDF grande (10MB) → 200")
     void downloadScorePdf_LargePdf_Returns200() {
         // GIVEN
@@ -128,6 +113,7 @@ class ScoreControllerDownloadTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("GET /api/scores/{id}/download - PDF vacío → 200 con 0 bytes")
     void downloadScorePdf_EmptyPdf_Returns200WithZeroBytes() {
         // GIVEN
@@ -148,6 +134,7 @@ class ScoreControllerDownloadTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("GET /api/scores/{id}/download - Error interno → 500")
     void downloadScorePdf_InternalError_Returns500() {
         // GIVEN
@@ -164,6 +151,7 @@ class ScoreControllerDownloadTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("GET /api/scores/{id}/download - Headers correctos para attachment")
     void downloadScorePdf_ValidRequest_ReturnsCorrectHeaders() {
         // GIVEN
@@ -180,5 +168,15 @@ class ScoreControllerDownloadTest {
                 .expectHeader().exists("Content-Disposition")
                 .expectHeader().exists("Content-Length")
                 .expectHeader().contentType(MediaType.APPLICATION_PDF);
+    }
+
+    @Test
+    @DisplayName("GET /api/scores/{id}/download - Sin autenticación → 401")
+    void downloadScorePdf_NotAuthenticated_Returns401() {
+        // WHEN & THEN (sin @WithMockUser)
+        webTestClient.get()
+                .uri("/api/scores/{id}/download", SCORE_ID)
+                .exchange()
+                .expectStatus().isUnauthorized();
     }
 }

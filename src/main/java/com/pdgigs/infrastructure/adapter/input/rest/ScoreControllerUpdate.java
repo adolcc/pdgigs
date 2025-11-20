@@ -21,25 +21,25 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
-@Tag(name = "Score Update", description = "Endpoints para actualizar partituras")
+@Tag(name = "Score Update", description = "Endpoint to update scores")
 public class ScoreControllerUpdate {
 
     private final UpdateScoreUseCase updateScoreUseCase;
     private final ScoreRestMapper scoreRestMapper;
 
     @Operation(
-            summary = "Actualizar metadata de una partitura",
-            description = "Actualiza parcial o totalmente la metadata de una partitura (título, autor, estilo musical)"
+            summary = "Update metadata of a score",
+            description = "Partially or fully updates the metadata of a score (title, author, musical style)"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Metadata actualizada exitosamente",
+            @ApiResponse(responseCode = "200", description = "Metadata successfully updated",
                     content = @Content(schema = @Schema(implementation = ScoreResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Partitura no encontrada")
+            @ApiResponse(responseCode = "404", description = "Score not found")
     })
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ScoreResponse> updateScoreMetadata(
-            @Parameter(description = "ID de la partitura", required = true, example = "674b8e1234567890abcdef12")
+            @Parameter(description = "Score ID", required = true, example = "674b8e1234567890abcdef12")
             @PathVariable String id,
 
             @RequestBody UpdateScoreRequest request
