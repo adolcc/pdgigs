@@ -1,22 +1,16 @@
-spring:
-  data:
-    mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/pdgigs}
-      database: ${SPRING_DATA_MONGODB_DATABASE:pdgigs}
-
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-
 server:
   port: 8080
 
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-    tagsSorter: alpha
-  show-actuator: false
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/pdgigs
+      auto-index-creation: true
+
+jwt:
+  secret: tu-secreto-super-seguro-minimo-32-caracteres-para-hs512-debe-ser-largo
+  expiration-ms: 86400000
+
+logging:
+  level:
+    com.pdgigs: DEBUG

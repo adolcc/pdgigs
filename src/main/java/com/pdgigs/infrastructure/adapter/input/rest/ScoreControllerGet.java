@@ -20,25 +20,25 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
-@Tag(name = "Score Query", description = "Endpoints para consultar información de partituras")
+@Tag(name = "Score Get", description = "Endpoints to get scores")
 public class ScoreControllerGet {
 
     private final GetScoreMetadataUseCase getScoreMetadataUseCase;
     private final ScoreRestMapper scoreRestMapper;
 
     @Operation(
-            summary = "Obtener metadata de una partitura",
-            description = "Obtiene la información (metadata) de una partitura por su ID"
+            summary = "Get metadata from a musical score",
+            description = "It retrieves information (metadata) from a score using its ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Metadata obtenida exitosamente",
+            @ApiResponse(responseCode = "200", description = "Metadata get successfully",
                     content = @Content(schema = @Schema(implementation = ScoreResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Partitura no encontrada")
+            @ApiResponse(responseCode = "404", description = "Score not found")
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ScoreResponse> getScoreMetadata(
-            @Parameter(description = "ID de la partitura", required = true, example = "674b8e1234567890abcdef12")
+            @Parameter(description = "Score ID", required = true, example = "674b8e1234567890abcdef12")
             @PathVariable String id
     ) {
         log.info("Getting metadata for score with ID: {}", id);

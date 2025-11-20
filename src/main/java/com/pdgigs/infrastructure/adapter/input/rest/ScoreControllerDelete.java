@@ -16,23 +16,23 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
-@Tag(name = "Score Delete", description = "Endpoints para eliminar partituras")
+@Tag(name = "Score Delete", description = "Endpoint to delete scores")
 public class ScoreControllerDelete {
 
     private final DeleteScoreUseCase deleteScoreUseCase;
 
     @Operation(
-            summary = "Eliminar una partitura",
-            description = "Elimina una partitura y su archivo PDF asociado usando su ID"
+            summary = "Delete a score",
+            description = "Delete a score and its associated PDF file using your ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Partitura eliminada exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Partitura no encontrada")
+            @ApiResponse(responseCode = "204", description = "Score successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Score not found")
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteScore(
-            @Parameter(description = "ID de la partitura a eliminar", required = true, example = "P-55")
+            @Parameter(description = "ID of the score to delete", required = true, example = "P-55")
             @PathVariable String id
     ) {
         log.info("Received request to delete score with ID: {}", id);
