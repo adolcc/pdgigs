@@ -3,10 +3,12 @@ package com.pdgigs.infrastructure.adapter.input.rest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.ChangePasswordRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.UpdateEmailRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.UpdateNameRequest;
-import com.pdgigs.infrastructure.adapter.input.rest.dto.response.UserResponse;
+import com.pdgigs.infrastructure.adapter.input.rest.dto.response.AuthWithUserResponse;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.UserRestMapper;
+import com.pdgigs.domain.model.User;
 import com.pdgigs.domain.port.input.GetUserUseCase;
 import com.pdgigs.domain.port.input.UpdateUserUseCase;
+import com.pdgigs.domain.port.output.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,46 +21,59 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@Tag(name = "User Update", description = "User profile and password management")
+@Tag(name = "User", description = "User profile and password management")
 public class UserController {
 
     private final GetUserUseCase getUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final UserRestMapper userRestMapper;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Operation(summary = "Update my name")
+    @Operation(summary = "Update my name and reissue token")
     @PutMapping("/me/name")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<UserResponse> updateName(@Valid @RequestBody UpdateNameRequest req) {
+    public Mono<AuthWithUserResponse> updateName(@Valid @RequestBody UpdateNameRequest req) {
         return currentUserId()
                 .flatMap(id -> updateUserUseCase.updateName(id, req.name()))
-                .map(userRestMapper::toResponse);
+                .flatMap(this::buildAuthWithUserResponse);
     }
 
-    @Operation(summary = "Update my email")
+    @Operation(summary = "Update my email and reissue token")
     @PutMapping("/me/email")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<UserResponse> updateEmail(@Valid @RequestBody UpdateEmailRequest req) {
+    public Mono<AuthWithUserResponse> updateEmail(@Valid @RequestBody UpdateEmailRequest req) {
         return currentUserId()
                 .flatMap(id -> updateUserUseCase.updateEmail(id, req.email()))
-                .map(userRestMapper::toResponse);
+                .flatMap(this::buildAuthWithUserResponse);
     }
 
-    @Operation(summary = "Change my password")
+    @Operation(summary = "Change my password and reissue token")
     @PutMapping("/me/password")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Void> changePassword(@Valid @RequestBody ChangePasswordRequest req) {
+    public Mono<AuthWithUserResponse> changePassword(@Valid @RequestBody ChangePasswordRequest req) {
         return currentUserId()
                 .flatMap(id -> updateUserUseCase.changePassword(id, req.currentPassword(), req.newPassword()))
-                .then();
+                .flatMap(this::buildAuthWithUserResponse);
+    }
+
+    private Mono<AuthWithUserResponse> buildAuthWithUserResponse(User user) {
+        return jwtTokenProvider.generateToken(user)
+                .map(token -> new AuthWithUserResponse(token, "Bearer", userRestMapper.toResponse(user)));
     }
 
     private Mono<String> currentUserId() {
+        // Mejor obtener el username con Authentication.getName(), que funciona con @WithMockUser y con otros Principal types
         return ReactiveSecurityContextHolder.getContext()
-                .map(ctx -> ctx.getAuthentication())
-                .flatMap(auth -> {
-                    String email = (auth != null && auth.getPrincipal() instanceof String) ? (String) auth.getPrincipal() : null;
-                    return email == null ? Mono.empty() : getUserUseCase.getUserByEmail(email).map(u -> u.id());
+                .flatMap(ctx -> {
+                    var auth = ctx.getAuthentication();
+                    if (auth == null) {
+                        return Mono.empty();
+                    }
+                    String email = auth.getName(); // nombre de usuario (username) — en tu sistema es el email
+                    if (email == null || email.isBlank()) {
+                        return Mono.empty();
+                    }
+                    return getUserUseCase.getUserByEmail(email).map(User::id);
                 });
     }
 }
