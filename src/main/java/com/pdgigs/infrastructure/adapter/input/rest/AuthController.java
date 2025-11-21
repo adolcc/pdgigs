@@ -2,9 +2,11 @@ package com.pdgigs.infrastructure.adapter.input.rest;
 
 import com.pdgigs.domain.port.input.AuthenticateUserUseCase;
 import com.pdgigs.domain.port.input.RegisterUserUseCase;
+import com.pdgigs.domain.port.output.UserRepository;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.LoginRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.RegisterRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.AuthResponse;
+import com.pdgigs.infrastructure.adapter.input.rest.mapper.UserRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,8 @@ public class AuthController {
 
     private final RegisterUserUseCase registerUserUseCase;
     private final AuthenticateUserUseCase authenticateUserUseCase;
+    private final UserRepository userRepository;
+    private final UserRestMapper userRestMapper;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,6 +41,10 @@ public class AuthController {
         log.info("Login request for email: {}", request.email());
 
         return authenticateUserUseCase.authenticate(request.email(), request.password())
-                .map(token -> new AuthResponse(token, request.email(), null, null));
+                .flatMap(token ->
+                        userRepository.findByEmail(request.email())
+                                .map(user -> new AuthResponse(token, user.email(), user.name(), user.role()))
+                                .switchIfEmpty(Mono.just(new AuthResponse(token, request.email(), null, null)))
+                );
     }
 }

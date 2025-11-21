@@ -5,6 +5,7 @@ import com.pdgigs.domain.port.output.UserRepository;
 import com.pdgigs.infrastructure.adapter.output.persistence.mapper.UserPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -42,5 +43,11 @@ public class UserRepositoryAdapter implements UserRepository {
     @Override
     public Mono<Void> deleteById(String id) {
         return mongoRepository.deleteById(id);
+    }
+
+    @Override
+    public Flux<User> findAll() {
+        return mongoRepository.findAll()
+                .map(mapper::toDomain);
     }
 }

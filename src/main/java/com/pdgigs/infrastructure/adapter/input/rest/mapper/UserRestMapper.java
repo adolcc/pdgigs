@@ -9,6 +9,11 @@ public class UserRestMapper {
 
     public UserResponse toResponse(User user) {
         if (user == null) return null;
-        return new UserResponse(user.id(), user.email(), user.name(), user.role());
+        return new UserResponse(
+                user.id(),
+                user.email(),
+                user.name(),
+                user.role()
+        );
     }
 }
