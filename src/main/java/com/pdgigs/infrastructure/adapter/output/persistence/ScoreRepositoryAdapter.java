@@ -5,6 +5,7 @@ import com.pdgigs.domain.port.output.ScoreRepository;
 import com.pdgigs.infrastructure.adapter.output.persistence.entity.ScoreEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -29,6 +30,12 @@ public class ScoreRepositoryAdapter implements ScoreRepository {
     @Override
     public Mono<Void> deleteById(String id) {
         return mongoScoreRepository.deleteById(id);
+    }
+
+    @Override
+    public Flux<Score> findAll() {
+        return mongoScoreRepository.findAll()
+                .map(this::toDomain);
     }
 
     private ScoreEntity toEntity(Score score) {
