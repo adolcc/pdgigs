@@ -17,8 +17,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,13 +32,13 @@ class ScoreControllerValidationIT {
     private CreateScoreUseCase createScoreUseCase;
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(username = "test@example.com", roles = "USER")
     @DisplayName("POST /api/scores - Archivo no PDF → 415")
     void uploadScore_InvalidFormat_Returns415() {
         // GIVEN
         ValidationException validationException = new FileValidationError.InvalidFormat().toException();
 
-        when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString()))
+        when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Mono.error(validationException));
 
         // WHEN & THEN
@@ -56,7 +55,7 @@ class ScoreControllerValidationIT {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(username = "test@example.com", roles = "USER")
     @DisplayName("POST /api/scores - Archivo >10MB → 413")
     void uploadScore_FileTooLarge_Returns413() {
         // GIVEN
@@ -64,7 +63,7 @@ class ScoreControllerValidationIT {
         long maxSize = 10 * 1024 * 1024;
         ValidationException validationException = new FileValidationError.SizeExceeded(actualSize, maxSize).toException();
 
-        when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString()))
+        when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Mono.error(validationException));
 
         // WHEN & THEN
@@ -81,13 +80,13 @@ class ScoreControllerValidationIT {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(username = "test@example.com", roles = "USER")
     @DisplayName("POST /api/scores - Archivo vacío → 400")
     void uploadScore_EmptyFile_Returns400() {
         // GIVEN
         ValidationException validationException = new FileValidationError.Empty().toException();
 
-        when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString()))
+        when(createScoreUseCase.createScore(any(byte[].class), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Mono.error(validationException));
 
         // WHEN & THEN

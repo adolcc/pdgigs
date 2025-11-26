@@ -32,7 +32,10 @@ public class UpdateScoreService implements UpdateScoreUseCase {
                             author != null ? author : existing.author(),
                             musicalStyle != null ? musicalStyle : existing.musicalStyle(),
                             existing.pdfContent(),
-                            existing.fileSize()
+                            existing.fileSize(),
+                            existing.userId(),
+                            existing.userEmail(),
+                            existing.createdAt()
                     );
                     return scoreRepository.save(updated);
                 })

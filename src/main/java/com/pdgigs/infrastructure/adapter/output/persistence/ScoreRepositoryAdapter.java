@@ -46,6 +46,9 @@ public class ScoreRepositoryAdapter implements ScoreRepository {
                 .musicalStyle(score.musicalStyle())
                 .pdfContent(score.pdfContent())
                 .fileSize(score.fileSize())
+                .userId(score.userId())
+                .userEmail(score.userEmail())
+                .createdAt(score.createdAt())
                 .build();
     }
 
@@ -56,7 +59,10 @@ public class ScoreRepositoryAdapter implements ScoreRepository {
                 entity.getAuthor(),
                 entity.getMusicalStyle(),
                 entity.getPdfContent(),
-                entity.getFileSize()
+                entity.getFileSize(),
+                entity.getUserId(),
+                entity.getUserEmail(),
+                entity.getCreatedAt()
         );
     }
 }

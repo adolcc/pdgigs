@@ -13,7 +13,10 @@ public class ScoreRestMapper {
                 score.title(),
                 score.author(),
                 score.musicalStyle(),
-                score.fileSize()
+                score.fileSize(),
+                "/api/scores/" + score.id() + "/pdf",
+                score.userId(),
+                score.userEmail()
         );
     }
 }

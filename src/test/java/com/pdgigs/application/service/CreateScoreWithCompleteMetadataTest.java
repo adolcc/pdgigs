@@ -1,7 +1,9 @@
 package com.pdgigs.application.service;
 
 import com.pdgigs.domain.model.Score;
+import com.pdgigs.domain.model.User;
 import com.pdgigs.domain.port.output.ScoreRepository;
+import com.pdgigs.domain.port.output.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,15 +24,21 @@ class CreateScoreWithCompleteMetadataTest {
 
     private static final byte[] VALID_PDF = "%PDF-1.4\nfake-pdf-content".getBytes();
     private static final String SCORE_ID = "507f1f77bcf86cd799439011";
+    private static final String USER_EMAIL = "mozart@example.com";
+    private static final User TEST_USER = new User("user123", USER_EMAIL, "Mozart", "password", User.ROLE_USER, null, null);
 
     @Mock
     private ScoreRepository scoreRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     private CreateScoreService createScoreService;
 
     @BeforeEach
     void setUp() {
-        createScoreService = new CreateScoreService(scoreRepository);
+        createScoreService = new CreateScoreService(scoreRepository, userRepository);
+        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Mono.just(TEST_USER));
     }
 
     @Test
@@ -43,7 +51,10 @@ class CreateScoreWithCompleteMetadataTest {
                 "Wolfgang Amadeus Mozart",
                 "Clásico",
                 VALID_PDF,
-                (long) VALID_PDF.length
+                (long) VALID_PDF.length,
+                TEST_USER.id(),
+                TEST_USER.email(),
+                null
         );
 
         when(scoreRepository.save(any(Score.class)))
@@ -54,7 +65,8 @@ class CreateScoreWithCompleteMetadataTest {
                 VALID_PDF,
                 "Concierto Nº 5",
                 "Wolfgang Amadeus Mozart",
-                "Clásico"
+                "Clásico",
+                USER_EMAIL
         );
 
         // THEN
@@ -66,6 +78,8 @@ class CreateScoreWithCompleteMetadataTest {
                     assertThat(score.musicalStyle()).isEqualTo("Clásico");
                     assertThat(score.pdfContent()).isEqualTo(VALID_PDF);
                     assertThat(score.fileSize()).isEqualTo((long) VALID_PDF.length);
+                    assertThat(score.userId()).isEqualTo(TEST_USER.id());
+                    assertThat(score.userEmail()).isEqualTo(USER_EMAIL);
                 })
                 .verifyComplete();
 
@@ -82,7 +96,10 @@ class CreateScoreWithCompleteMetadataTest {
                 "Wolfgang Amadeus Mozart",
                 "Música Clásica del Siglo XVIII",
                 VALID_PDF,
-                (long) VALID_PDF.length
+                (long) VALID_PDF.length,
+                TEST_USER.id(),
+                TEST_USER.email(),
+                null
         );
 
         when(scoreRepository.save(any(Score.class)))
@@ -93,7 +110,8 @@ class CreateScoreWithCompleteMetadataTest {
                 VALID_PDF,
                 "Sinfonía No. 40 en Sol Menor",
                 "Wolfgang Amadeus Mozart",
-                "Música Clásica del Siglo XVIII"
+                "Música Clásica del Siglo XVIII",
+                USER_EMAIL
         );
 
         // THEN
@@ -102,6 +120,7 @@ class CreateScoreWithCompleteMetadataTest {
                     assertThat(score.title()).contains("Sinfonía");
                     assertThat(score.author()).contains("Mozart");
                     assertThat(score.musicalStyle()).contains("Clásica");
+                    assertThat(score.userEmail()).isEqualTo(USER_EMAIL);
                 })
                 .verifyComplete();
     }
@@ -116,20 +135,30 @@ class CreateScoreWithCompleteMetadataTest {
                 "Autor",
                 "Estilo",
                 VALID_PDF,
-                (long) VALID_PDF.length
+                (long) VALID_PDF.length,
+                TEST_USER.id(),
+                TEST_USER.email(),
+                null
         );
 
         when(scoreRepository.save(any(Score.class)))
                 .thenReturn(Mono.just(expectedScore));
 
         // WHEN
-        Mono<Score> result = createScoreService.createScore(VALID_PDF, "Título", "Autor", "Estilo");
+        Mono<Score> result = createScoreService.createScore(
+                VALID_PDF,
+                "Título",
+                "Autor",
+                "Estilo",
+                USER_EMAIL
+        );
 
         // THEN
         StepVerifier.create(result)
                 .assertNext(score -> {
                     assertThat(score.fileSize()).isPositive();
                     assertThat(score.fileSize()).isEqualTo((long) VALID_PDF.length);
+                    assertThat(score.userId()).isEqualTo(TEST_USER.id());
                 })
                 .verifyComplete();
 

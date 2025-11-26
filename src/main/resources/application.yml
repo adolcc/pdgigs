@@ -8,8 +8,14 @@ spring:
       auto-index-creation: true
 
 jwt:
-  secret: tu-secreto-super-seguro-minimo-32-caracteres-para-hs512-debe-ser-largo
+  secret: clave-super-secreta-para-desarrollo-2024
   expiration-ms: 86400000
+
+app:
+  bootstrap:
+    admin:
+      email: admin@example.com
+      password: admin123
 
 logging:
   level:

@@ -44,7 +44,7 @@ public class UpdateUserService implements UpdateUserUseCase {
                 .switchIfEmpty(Mono.error(ResourceNotFoundException.userById(userId)))
                 .flatMap(u -> {
                     if (u.email().equalsIgnoreCase(newEmail)) {
-                        return Mono.just(u); // nothing to change
+                        return Mono.just(u);
                     }
                     return userRepository.existsByEmail(newEmail)
                             .flatMap(exists -> exists

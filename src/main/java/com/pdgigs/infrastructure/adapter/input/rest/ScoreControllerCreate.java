@@ -16,6 +16,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -42,7 +43,6 @@ public class ScoreControllerCreate {
             @ApiResponse(responseCode = "415", description = "Invalid file format (must be PDF)"),
             @ApiResponse(responseCode = "413", description = "The file exceeds the maximum allowed size (10MB)")
     })
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ScoreResponse> createScore(
@@ -56,9 +56,13 @@ public class ScoreControllerCreate {
             @RequestPart(name = "author", required = false) String author,
 
             @Parameter(description = "Musical style of the score")
-            @RequestPart(name = "musicalStyle", required = false) String musicalStyle
+            @RequestPart(name = "musicalStyle", required = false) String musicalStyle,
+
+            Authentication authentication
     ) {
-        log.info("Uploading score - title: {}, author: {}, musicalStyle: {}", title, author, musicalStyle);
+        String userEmail = authentication.getName();
+        log.info("Uploading score - title: {}, author: {}, musicalStyle: {}, user: {}",
+                title, author, musicalStyle, userEmail);
 
         return DataBufferUtils.join(file.content())
                 .map(dataBuffer -> {
@@ -72,11 +76,16 @@ public class ScoreControllerCreate {
                     }
                 })
                 .flatMap(pdfContent ->
-                        createScoreUseCase.createScore(pdfContent, title == null ? "" : title,
+                        createScoreUseCase.createScore(
+                                pdfContent,
+                                title == null ? "" : title,
                                 author == null ? "" : author,
-                                musicalStyle == null ? "" : musicalStyle))
+                                musicalStyle == null ? "" : musicalStyle,
+                                userEmail
+                        ))
                 .map(scoreRestMapper::toResponse)
-                .doOnSuccess(response -> log.info("Score uploaded successfully with ID: {}", response.id()))
-                .doOnError(error -> log.error("Error uploading score", error));
+                .doOnSuccess(response -> log.info("Score uploaded successfully with ID: {} for user: {}",
+                        response.id(), userEmail))
+                .doOnError(error -> log.error("Error uploading score for user: {}", userEmail, error));
     }
 }

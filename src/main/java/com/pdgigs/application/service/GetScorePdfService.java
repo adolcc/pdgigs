@@ -23,9 +23,9 @@ public class GetScorePdfService implements GetScorePdfUseCase {
 
         return ScoreValidator.validateScoreId(scoreId)
                 .then(scoreRepository.findById(scoreId))
-                .switchIfEmpty(Mono.error(ResourceNotFoundException.score(scoreId)))
+                .switchIfEmpty(Mono.defer(() -> Mono.error(ResourceNotFoundException.score(scoreId))))
                 .map(Score::pdfContent)
-                .doOnSuccess(content -> log.info("PDF retrieved for score: {} ({} bytes)",
-                        scoreId, content.length));
+                .doOnSuccess(pdf -> log.info("PDF content retrieved successfully for score: {}", scoreId))
+                .doOnError(error -> log.error("Error retrieving PDF content for score {}: {}", scoreId, error.getMessage()));
     }
 }

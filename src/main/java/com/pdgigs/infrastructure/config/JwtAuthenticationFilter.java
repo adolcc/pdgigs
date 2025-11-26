@@ -5,6 +5,7 @@ import com.pdgigs.domain.port.output.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,19 +31,27 @@ public class JwtAuthenticationFilter implements WebFilter {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
 
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            log.debug("Allowing OPTIONS request for path: {}", path);
+            return chain.filter(exchange);
+        }
+
         if (path.startsWith("/auth/") ||
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/webjars/")) {
+            log.debug("Allowing public access to path: {}", path);
             return chain.filter(exchange);
         }
 
         String token = extractToken(request);
 
         if (token == null) {
-            log.warn("No JWT token found in request to: {}", path);
+            log.debug("No JWT token found in request to: {}", path);
             return chain.filter(exchange);
         }
+
+        log.debug("JWT token found, validating for path: {}", path);
 
         return jwtTokenProvider.validateToken(token)
                 .flatMap(isValid -> {
@@ -64,14 +73,14 @@ public class JwtAuthenticationFilter implements WebFilter {
                                                 authorities
                                         );
 
-                                log.info("Authenticated user: {} with role: {}", user.email(), user.role());
+                                log.info("Authenticated user: {} with role: {} for path: {}", user.email(), user.role(), path);
 
                                 return chain.filter(exchange)
                                         .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
                             });
                 })
                 .onErrorResume(error -> {
-                    log.error("Error processing JWT token: {}", error.getMessage());
+                    log.error("Error processing JWT token for path {}: {}", path, error.getMessage());
                     return chain.filter(exchange);
                 });
     }

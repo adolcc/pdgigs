@@ -21,6 +21,8 @@ services:
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/pdgigs
       SPRING_DATA_MONGODB_DATABASE: pdgigs
+      APP_BOOTSTRAP_ADMIN_EMAIL: admin@example.com
+      APP_BOOTSTRAP_ADMIN_PASSWORD: admin123
     depends_on:
       - mongodb
     networks:
