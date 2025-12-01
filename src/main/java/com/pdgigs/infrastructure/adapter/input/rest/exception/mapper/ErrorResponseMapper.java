@@ -14,8 +14,14 @@ public class ErrorResponseMapper {
             HttpStatus status,
             ServerWebExchange exchange
     ) {
+        String message = ex.getMessage();
+
+        if (ex.getErrorCode().equals("VALIDATION_ERROR") && message.contains("MongoDB ObjectId")) {
+            message = "Validation failed for 'scoreId': Invalid ID format.";
+        }
+
         return new ErrorResponse(
-                ex.getMessage(),
+                message,
                 status.value(),
                 LocalDateTime.now(),
                 extractPath(exchange),

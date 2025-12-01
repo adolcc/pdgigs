@@ -1,6 +1,6 @@
 package com.pdgigs.domain.validator;
 
-import com.pdgigs.domain.exception.validation.UserValidationError;
+import com.pdgigs.domain.exception.ValidationException;
 import reactor.core.publisher.Mono;
 
 import java.util.regex.Pattern;
@@ -14,11 +14,11 @@ public class UserValidator {
 
     public static Mono<Void> validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            return Mono.error(new UserValidationError.EmailRequired().toException());
+            return Mono.error(ValidationException.required("email"));
         }
 
         if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return Mono.error(new UserValidationError.InvalidEmail().toException());
+            return Mono.error(ValidationException.invalidField("email", "Invalid email format"));
         }
 
         return Mono.empty();
@@ -26,11 +26,12 @@ public class UserValidator {
 
     public static Mono<Void> validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            return Mono.error(new UserValidationError.PasswordRequired().toException());
+            return Mono.error(ValidationException.required("password"));
         }
 
         if (password.length() < MIN_PASSWORD_LENGTH) {
-            return Mono.error(new UserValidationError.PasswordTooShort().toException());
+            String reason = String.format("Password must be at least %d characters long", MIN_PASSWORD_LENGTH);
+            return Mono.error(ValidationException.invalidField("password", reason));
         }
 
         return Mono.empty();

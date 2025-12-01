@@ -1,6 +1,4 @@
-package com.pdgigs.domain.exception.validation;
-
-import com.pdgigs.domain.exception.DomainException;
+package com.pdgigs.domain.exception;
 
 public class ValidationException extends DomainException {
 
@@ -23,3 +21,4 @@ public class ValidationException extends DomainException {
         return new ValidationException(field, "is required and cannot be empty");
     }
 }
+

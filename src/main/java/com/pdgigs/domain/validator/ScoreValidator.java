@@ -1,6 +1,6 @@
 package com.pdgigs.domain.validator;
 
-import com.pdgigs.domain.exception.validation.ScoreValidationError;
+import com.pdgigs.domain.exception.ValidationException;
 import reactor.core.publisher.Mono;
 
 public class ScoreValidator {
@@ -11,11 +11,12 @@ public class ScoreValidator {
 
     public static Mono<Void> validateScoreId(String scoreId) {
         if (scoreId == null || scoreId.isEmpty()) {
-            return Mono.error(new ScoreValidationError.InvalidScoreId().toException());
+            return Mono.error(ValidationException.required("scoreId"));
         }
 
         if (!scoreId.matches("^[a-fA-F0-9]{24}$")) {
-            return Mono.error(new ScoreValidationError.InvalidScoreId().toException());
+            String reason = "Invalid score ID format. Must be a valid MongoDB ObjectId (24 hexadecimal characters)";
+            return Mono.error(ValidationException.invalidField("scoreId", reason));
         }
 
         return Mono.empty();
@@ -24,24 +25,30 @@ public class ScoreValidator {
     public static Mono<Void> validateMetadata(String title, String author, String musicalStyle) {
 
         if (title != null && !title.isEmpty() && title.isBlank()) {
-            return Mono.error(new ScoreValidationError.TitleCannotBeBlank().toException());
+            return Mono.error(ValidationException.required("title"));
         }
         if (title != null && title.length() > MAX_TITLE_LENGTH) {
-            return Mono.error(new ScoreValidationError.TitleTooLong(title.length(), MAX_TITLE_LENGTH).toException());
+            String reason = String.format("Title is too long (%d characters). Maximum allowed is %d characters",
+                    title.length(), MAX_TITLE_LENGTH);
+            return Mono.error(ValidationException.invalidField("title", reason));
         }
 
         if (author != null && !author.isEmpty() && author.isBlank()) {
-            return Mono.error(new ScoreValidationError.AuthorCannotBeBlank().toException());
+            return Mono.error(ValidationException.required("author"));
         }
         if (author != null && author.length() > MAX_AUTHOR_LENGTH) {
-            return Mono.error(new ScoreValidationError.AuthorTooLong(author.length(), MAX_AUTHOR_LENGTH).toException());
+            String reason = String.format("Author is too long (%d characters). Maximum allowed is %d characters",
+                    author.length(), MAX_AUTHOR_LENGTH);
+            return Mono.error(ValidationException.invalidField("author", reason));
         }
 
         if (musicalStyle != null && !musicalStyle.isEmpty() && musicalStyle.isBlank()) {
-            return Mono.error(new ScoreValidationError.MusicalStyleCannotBeBlank().toException());
+            return Mono.error(ValidationException.required("musicalStyle"));
         }
         if (musicalStyle != null && musicalStyle.length() > MAX_STYLE_LENGTH) {
-            return Mono.error(new ScoreValidationError.MusicalStyleTooLong(musicalStyle.length(), MAX_STYLE_LENGTH).toException());
+            String reason = String.format("Musical style is too long (%d characters). Maximum allowed is %d characters",
+                    musicalStyle.length(), MAX_STYLE_LENGTH);
+            return Mono.error(ValidationException.invalidField("musicalStyle", reason));
         }
 
         return Mono.empty();

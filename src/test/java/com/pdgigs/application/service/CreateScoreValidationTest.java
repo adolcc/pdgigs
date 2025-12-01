@@ -1,6 +1,6 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.domain.exception.validation.ValidationException;
+import com.pdgigs.domain.exception.ValidationException;
 import com.pdgigs.domain.model.User;
 import com.pdgigs.domain.port.output.ScoreRepository;
 import com.pdgigs.domain.port.output.UserRepository;

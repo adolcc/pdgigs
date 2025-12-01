@@ -1,5 +1,6 @@
 package com.pdgigs.application.service;
 
+import com.pdgigs.domain.exception.ValidationException;
 import com.pdgigs.domain.model.Score;
 import com.pdgigs.domain.model.User;
 import com.pdgigs.domain.port.input.AdminChangeUserRoleUseCase;
@@ -10,7 +11,6 @@ import com.pdgigs.domain.port.input.AdminListUsersUseCase;
 import com.pdgigs.domain.port.output.ScoreRepository;
 import com.pdgigs.domain.port.output.UserRepository;
 import com.pdgigs.domain.exception.ResourceNotFoundException;
-import com.pdgigs.domain.exception.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -48,7 +48,6 @@ public class AdminService implements
                 .switchIfEmpty(Mono.error(ResourceNotFoundException.userById(userId)))
                 .flatMap(u -> {
                     if (User.ROLE_ADMIN.equals(u.role())) {
-                        // comprobar si es el último admin
                         return userRepository.findAll()
                                 .filter(x -> User.ROLE_ADMIN.equals(x.role()))
                                 .count()

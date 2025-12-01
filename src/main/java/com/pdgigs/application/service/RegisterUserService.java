@@ -1,6 +1,6 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.domain.exception.validation.UserValidationError;
+import com.pdgigs.domain.exception.ConflictException;
 import com.pdgigs.domain.model.User;
 import com.pdgigs.domain.port.input.RegisterUserUseCase;
 import com.pdgigs.domain.port.output.PasswordEncoder;
@@ -48,7 +48,7 @@ public class RegisterUserService implements RegisterUserUseCase {
         return userRepository.existsByEmail(email)
                 .flatMap(exists -> {
                     if (exists) {
-                        return Mono.error(new UserValidationError.EmailAlreadyExists(email).toException());
+                        return Mono.error(ConflictException.userAlreadyExists(email));
                     }
                     return Mono.empty();
                 });

@@ -6,7 +6,7 @@ import com.pdgigs.domain.port.output.PasswordEncoder;
 import com.pdgigs.domain.port.output.UserRepository;
 import com.pdgigs.domain.exception.ConflictException;
 import com.pdgigs.domain.exception.ResourceNotFoundException;
-import com.pdgigs.domain.exception.validation.ValidationException;
+import com.pdgigs.domain.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;

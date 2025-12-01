@@ -18,26 +18,16 @@ public class GlobalFallbackHandler {
 
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<ErrorResponse>> handleGenericException(
-            Exception ex,
-            ServerWebExchange exchange
-    ) {
-        log.error("========================================");
-        log.error("❌ CAUGHT BY GLOBAL FALLBACK HANDLER ❌");
-        log.error("Exception type: {}", ex.getClass().getName());
-        log.error("Exception message: {}", ex.getMessage());
-        if (ex.getCause() != null) {
-            log.error("Exception cause type: {}", ex.getCause().getClass().getName());
-            log.error("Exception cause message: {}", ex.getCause().getMessage());
-        }
-        log.error("Stack trace:", ex);
-        log.error("========================================");
+            Exception ex, ServerWebExchange exchange) {
 
-        ErrorResponse error = ErrorResponseMapper.fromGenericException(
-                ex,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                exchange
-        );
+        log.error("❌ UNEXPECTED ERROR: {}", ex.getMessage(), ex);
 
-        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error));
+        HttpStatus status = (exchange.getResponse().getStatusCode() != null)
+                ? HttpStatus.valueOf(exchange.getResponse().getStatusCode().value())
+                : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        return Mono.fromCallable(() -> ErrorResponseMapper.fromGenericException(
+                ex, status, exchange
+        )).map(response -> ResponseEntity.status(status).body(response));
     }
 }

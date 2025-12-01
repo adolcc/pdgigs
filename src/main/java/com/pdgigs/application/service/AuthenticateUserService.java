@@ -1,6 +1,6 @@
 package com.pdgigs.application.service;
 
-import com.pdgigs.domain.exception.validation.UserValidationError;
+import com.pdgigs.domain.exception.UnauthorizedException;
 import com.pdgigs.domain.port.input.AuthenticateUserUseCase;
 import com.pdgigs.domain.port.output.JwtTokenProvider;
 import com.pdgigs.domain.port.output.PasswordEncoder;
@@ -24,11 +24,11 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
         log.info("Authenticating user: {}", email);
 
         return userRepository.findByEmail(email)
-                .switchIfEmpty(Mono.error(new UserValidationError.InvalidCredentials().toException()))
+                .switchIfEmpty(Mono.error(UnauthorizedException.invalidCredentials()))
                 .flatMap(user -> passwordEncoder.matches(password, user.password())
                         .flatMap(matches -> {
                             if (!matches) {
-                                return Mono.error(new UserValidationError.InvalidCredentials().toException());
+                                return Mono.error(UnauthorizedException.invalidCredentials());
                             }
                             return jwtTokenProvider.generateToken(user);
                         })
