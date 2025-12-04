@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -39,7 +38,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @Import(TestStubsConfig.class)
-public class ScoreReadServiceIT {
+public class ReadScoreServiceIT {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
@@ -71,7 +70,7 @@ public class ScoreReadServiceIT {
 
     @BeforeAll
     static void loadPdf() throws IOException {
-        InputStream is = ScoreReadServiceIT.class.getClassLoader().getResourceAsStream("sample.pdf");
+        InputStream is = ReadScoreServiceIT.class.getClassLoader().getResourceAsStream("sample.pdf");
         if (is == null) throw new IOException("sample.pdf not found in classpath");
         try (InputStream in = is) {
             pdfBytes = in.readAllBytes();
