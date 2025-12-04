@@ -62,14 +62,14 @@ public class UserController {
     }
 
     private Mono<String> currentUserId() {
-        // Mejor obtener el username con Authentication.getName(), que funciona con @WithMockUser y con otros Principal types
+
         return ReactiveSecurityContextHolder.getContext()
                 .flatMap(ctx -> {
                     var auth = ctx.getAuthentication();
                     if (auth == null) {
                         return Mono.empty();
                     }
-                    String email = auth.getName(); // nombre de usuario (username) — en tu sistema es el email
+                    String email = auth.getName();
                     if (email == null || email.isBlank()) {
                         return Mono.empty();
                     }

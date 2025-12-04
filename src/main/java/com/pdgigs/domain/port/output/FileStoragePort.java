@@ -7,4 +7,5 @@ import reactor.core.publisher.Mono;
 public interface FileStoragePort {
     Mono<String> store(FilePart filePart, String filename);
     Mono<Resource> download(String storageId);
+    Mono<Void> delete(String storageId);
 }

@@ -2,42 +2,22 @@ package com.pdgigs.infrastructure.adapter.input.rest;
 
 import com.pdgigs.domain.port.input.DeleteScoreUseCase;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/scores")
 @RequiredArgsConstructor
-@Tag(name = "Score Delete", description = "Endpoint to delete scores")
 public class ScoreControllerDelete {
 
     private final DeleteScoreUseCase deleteScoreUseCase;
 
-    @Operation(
-            summary = "Delete a score",
-            description = "Delete a score and its associated PDF file using your ID"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Score successfully deleted"),
-            @ApiResponse(responseCode = "404", description = "Score not found")
-    })
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> deleteScore(
-            @Parameter(description = "ID of the score to delete", required = true, example = "P-55")
-            @PathVariable String id
-    ) {
-        log.info("Received request to delete score with ID: {}", id);
-        return deleteScoreUseCase.deleteScore(id)
-                .doOnSuccess(unused -> log.info("Score with ID {} deleted successfully", id))
-                .doOnError(error -> log.error("Error deleting score with ID: {}", id, error));
+    @Operation(summary = "Delete a score by id")
+    @DeleteMapping(path = "/{id}")
+    public Mono<ResponseEntity<Void>> deleteScore(@PathVariable("id") String id) {
+        return deleteScoreUseCase.deleteById(id)
+                .thenReturn(ResponseEntity.noContent().<Void>build());
     }
 }
