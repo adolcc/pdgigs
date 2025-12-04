@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @Import(TestStubsConfig.class)
-public class ReadScoreServiceIT {
+public class DownloadScoreServiceIT {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
@@ -70,7 +70,7 @@ public class ReadScoreServiceIT {
 
     @BeforeAll
     static void loadPdf() throws IOException {
-        InputStream is = ReadScoreServiceIT.class.getClassLoader().getResourceAsStream("sample.pdf");
+        InputStream is = DownloadScoreServiceIT.class.getClassLoader().getResourceAsStream("sample.pdf");
         if (is == null) throw new IOException("sample.pdf not found in classpath");
         try (InputStream in = is) {
             pdfBytes = in.readAllBytes();

@@ -1,14 +1,10 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.domain.port.input.GetScorePdfUseCase;
+import com.pdgigs.application.dto.DownloadableScore;
+import com.pdgigs.application.service.ScoreDownloadService;
+import com.pdgigs.domain.port.input.GetScoreMetadataUseCase;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -17,43 +13,42 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-@Slf4j
+import java.nio.charset.StandardCharsets;
+
 @RestController
-@RequestMapping("/api/scores")
+@RequestMapping(path = "/api/scores")
 @RequiredArgsConstructor
-@Tag(name = "Score Download", description = "Endpoint to download scores")
-@ConditionalOnProperty(name = "features.download-score.enabled", havingValue = "true", matchIfMissing = false)
 public class ScoreControllerDownload {
 
-    private final GetScorePdfUseCase getScorePdfUseCase;
+    private final GetScoreMetadataUseCase getScoreMetadataUseCase;
+    private final ScoreDownloadService scoreDownloadService;
 
-    @Operation(summary = "Download PDF of sheet music", description = "Download the PDF file of a score using its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "PDF downloaded successfully"),
-            @ApiResponse(responseCode = "404", description = "Score not found")
-    })
+    @Operation(summary = "Get score metadata by id")
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<com.pdgigs.infrastructure.adapter.input.rest.dto.response.UploadScoreResponse> getMetadata(@PathVariable("id") String id) {
+        return getScoreMetadataUseCase.findById(id)
+                .map(com.pdgigs.infrastructure.adapter.input.rest.mapper.UploadScoreMapper::toResponse);
+    }
+
+    @Operation(summary = "Download score PDF by id")
     @GetMapping(path = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public Mono<ResponseEntity<Resource>> downloadScorePdf(
-            @Parameter(description = "Score ID", required = true, example = "P-42")
-            @PathVariable String id
-    ) {
-        log.info("Downloading PDF for score with ID: {}", id);
+    public Mono<ResponseEntity<Resource>> downloadPdf(@PathVariable("id") String id) {
+        return scoreDownloadService.prepareDownload(id)
+                .map(this::toResponseEntity)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
 
-        return getScorePdfUseCase.getPdf(id)
-                .map(resource -> {
-                    ContentDisposition contentDisposition = ContentDisposition.attachment()
-                            .filename("score-" + id + ".pdf")
-                            .build();
+    private ResponseEntity<Resource> toResponseEntity(DownloadableScore downloadable) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
 
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_PDF);
-                    headers.setContentDisposition(contentDisposition);
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename(downloadable.filename(), StandardCharsets.UTF_8)
+                .build();
+        headers.setContentDisposition(contentDisposition);
 
-                    return ResponseEntity.ok()
-                            .headers(headers)
-                            .body(resource);
-                })
-                .doOnSuccess(r -> log.info("PDF prepared for ID: {}", id))
-                .doOnError(err -> log.error("Error preparing PDF for ID: {}", id, err));
+        downloadable.contentLength().ifPresent(headers::setContentLength);
+
+        return ResponseEntity.ok().headers(headers).body(downloadable.resource());
     }
 }

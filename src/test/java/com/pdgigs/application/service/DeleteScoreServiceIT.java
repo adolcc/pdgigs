@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @Import(TestStubsConfig.class)
-public class ScoreDeleteServiceIT {
+public class DeleteScoreServiceIT {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
@@ -62,7 +62,7 @@ public class ScoreDeleteServiceIT {
 
     @BeforeAll
     static void loadSample() throws IOException {
-        InputStream is = ScoreDeleteServiceIT.class.getClassLoader().getResourceAsStream("sample.pdf");
+        InputStream is = DeleteScoreServiceIT.class.getClassLoader().getResourceAsStream("sample.pdf");
 
         if (is != null) is.close();
     }
