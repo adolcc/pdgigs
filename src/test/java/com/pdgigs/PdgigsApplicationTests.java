@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(
+        classes = PdgigsApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 "spring.data.mongodb.auto-index-creation=false",
@@ -14,6 +15,5 @@ class PdgigsApplicationTests {
 
     @Test
     void contextLoads() {
-
     }
 }

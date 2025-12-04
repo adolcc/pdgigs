@@ -1,7 +1,8 @@
 package com.pdgigs.domain.port.input;
 
+import org.springframework.core.io.Resource;
 import reactor.core.publisher.Mono;
 
 public interface GetScorePdfUseCase {
-    Mono<byte[]> getPdfContentById(String scoreId);
+    Mono<Resource> getPdf(String scoreId);
 }

@@ -1,14 +1,14 @@
 package com.pdgigs.infrastructure.adapter.input.rest.mapper;
 
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.infrastructure.adapter.input.rest.dto.response.ScoreResponse;
-import org.springframework.stereotype.Component;
+import com.pdgigs.infrastructure.adapter.input.rest.dto.response.UploadScoreResponse;
 
-@Component
-public class ScoreRestMapper {
+public final class UploadScoreMapper {
 
-    public ScoreResponse toResponse(Score score) {
-        return new ScoreResponse(
+    private UploadScoreMapper() { /* util */ }
+
+    public static UploadScoreResponse toResponse(Score score) {
+        return new UploadScoreResponse(
                 score.id(),
                 score.title(),
                 score.author(),

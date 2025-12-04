@@ -15,30 +15,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UpdateScoreService implements UpdateScoreUseCase {
 
-    private final ScoreRepository scoreRepository;
-
     @Override
-    public Mono<Score> updateMetadata(String scoreId, String title, String author, String musicalStyle) {
-        log.debug("Updating metadata for score ID: {}", scoreId);
-
-        return ScoreValidator.validateScoreId(scoreId)
-                .then(ScoreValidator.validateMetadata(title, author, musicalStyle))
-                .then(scoreRepository.findById(scoreId))
-                .switchIfEmpty(Mono.error(ResourceNotFoundException.score(scoreId)))
-                .flatMap(existing -> {
-                    Score updated = new Score(
-                            existing.id(),
-                            title != null ? title : existing.title(),
-                            author != null ? author : existing.author(),
-                            musicalStyle != null ? musicalStyle : existing.musicalStyle(),
-                            existing.pdfContent(),
-                            existing.fileSize(),
-                            existing.userId(),
-                            existing.userEmail(),
-                            existing.createdAt()
-                    );
-                    return scoreRepository.save(updated);
-                })
-                .doOnSuccess(score -> log.info("Metadata updated for score: {}", scoreId));
+    public Mono<Score> updateMetadata(String id, String title, String author, String musicalStyle) {
+        return null;
     }
 }

@@ -6,21 +6,20 @@ public record Score(
         String id,
         String title,
         String author,
-        String musicalStyle,
-        byte[] pdfContent,
-        Long fileSize,
-        String userId,
-        String userEmail,
+        String musicStyle,
+        String filename,
         LocalDateTime createdAt
 ) {
-    public Score(String id, String title, String author, String musicalStyle,
-                 byte[] pdfContent, Long fileSize) {
-        this(id, title, author, musicalStyle, pdfContent, fileSize, null, null, LocalDateTime.now());
+    public Score(String id, String title, String author, String musicStyle, String filename) {
+        this(id, title == null ? "" : title, author == null ? "" : author, musicStyle == null ? "" : musicStyle, filename, LocalDateTime.now());
     }
 
     public Score {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+        if (title == null) title = "";
+        if (author == null) author = "";
+        if (musicStyle == null) musicStyle = "";
     }
 }

@@ -1,5 +1,6 @@
 package com.pdgigs.domain.exception;
 
+
 public abstract class DomainException extends RuntimeException {
     private final String errorCode;
 

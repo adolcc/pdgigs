@@ -14,21 +14,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class DeleteScoreService implements DeleteScoreUseCase {
 
-    private final ScoreRepository scoreRepository;
-
     @Override
     public Mono<Void> deleteScore(String scoreId) {
-        log.debug("Attempting to delete score with ID: {}", scoreId);
-
-        return ScoreValidator.validateScoreId(scoreId)
-                .then(scoreRepository.findById(scoreId))
-                .switchIfEmpty(Mono.error(ResourceNotFoundException.score(scoreId)))
-                .flatMap(score -> {
-                    log.debug("Score found. Deleting score with ID: {} (PDF size: {} bytes)",
-                            scoreId, score.pdfContent().length);
-                    return scoreRepository.deleteById(scoreId);
-                })
-                .doOnSuccess(unused -> log.info("Score deleted successfully: {}", scoreId))
-                .doOnError(error -> log.error("Error deleting score: {}", scoreId, error));
+        return null;
     }
 }

@@ -20,6 +20,13 @@ public class ErrorResponseMapper {
             message = "Validation failed for 'scoreId': Invalid ID format.";
         }
 
+        if (ex.getErrorCode().equals("VALIDATION_ERROR") && message.startsWith("Validation failed for 'file': ")) {
+            int idx = message.indexOf(":");
+            if (idx >= 0 && idx + 2 <= message.length()) {
+                message = message.substring(idx + 2); // the reason only
+            }
+        }
+
         return new ErrorResponse(
                 message,
                 status.value(),

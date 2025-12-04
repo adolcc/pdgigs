@@ -1,17 +1,22 @@
 package com.pdgigs.infrastructure.adapter.input.rest.dto.response;
 
+import java.time.LocalDateTime;
+
 public record ScoreResponse(
         String id,
         String title,
         String author,
         String musicalStyle,
-        Long fileSize,
-        String pdfDownloadUrl,
-        String userId,
-        String userEmail
+        String filename,
+        LocalDateTime createAT
 ) {
-    public ScoreResponse(String id, String title, String author, String musicalStyle,
-                         Long fileSize, String pdfDownloadUrl) {
-        this(id, title, author, musicalStyle, fileSize, pdfDownloadUrl, null, null);
+    public ScoreResponse(String id, String title, String author, String musicalStyle, String filename, LocalDateTime createAT) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.musicalStyle = musicalStyle;
+        this.filename = filename;
+        this.createAT = createAT;
     }
 }
+
