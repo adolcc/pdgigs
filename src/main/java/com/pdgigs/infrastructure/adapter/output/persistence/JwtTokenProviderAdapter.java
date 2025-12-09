@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -44,10 +43,10 @@ public class JwtTokenProviderAdapter implements JwtTokenProvider {
             Date expiryDate = new Date(now.getTime() + expirationMs);
 
             return Jwts.builder()
-                    .claims(claims)
-                    .subject(user.email())
-                    .issuedAt(now)
-                    .expiration(expiryDate)
+                    .setClaims(claims)
+                    .setSubject(user.email())
+                    .setIssuedAt(now)
+                    .setExpiration(expiryDate)
                     .signWith(secretKey)
                     .compact();
         });
@@ -55,9 +54,7 @@ public class JwtTokenProviderAdapter implements JwtTokenProvider {
 
     @Override
     public Mono<String> extractEmail(String token) {
-        return Mono.fromCallable(() ->
-                extractAllClaims(token).getSubject()
-        );
+        return Mono.fromCallable(() -> extractAllClaims(token).getSubject());
     }
 
     @Override
@@ -67,7 +64,7 @@ public class JwtTokenProviderAdapter implements JwtTokenProvider {
                 Claims claims = extractAllClaims(token);
                 return !claims.getExpiration().before(new Date());
             } catch (Exception e) {
-                log.error("Invalid JWT token: {}", e.getMessage());
+                log.debug("Invalid JWT token: {}", e.getMessage());
                 return false;
             }
         });
@@ -75,16 +72,14 @@ public class JwtTokenProviderAdapter implements JwtTokenProvider {
 
     @Override
     public Mono<String> extractRole(String token) {
-        return Mono.fromCallable(() ->
-                extractAllClaims(token).get("role", String.class)
-        );
+        return Mono.fromCallable(() -> extractAllClaims(token).get("role", String.class));
     }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(secretKey)
+                .setSigningKey(secretKey)
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

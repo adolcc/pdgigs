@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-
 import java.util.Optional;
 
 @Component
@@ -16,13 +15,13 @@ public class AdminBootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // null-safe: si userRepository.findAll() devolviera null, usamos Flux.empty()
+
         Flux<?> usersFlux = Optional.ofNullable(userRepository.findAll()).orElse(Flux.empty());
 
         usersFlux
-                .filter(user -> /* tu filtro */ true)
+                .filter(user -> true)
                 .flatMap(user -> {
-                    // lógica de bootstrap (crear admin si no existe, etc.)
+
                     return Flux.empty();
                 })
                 .subscribe();

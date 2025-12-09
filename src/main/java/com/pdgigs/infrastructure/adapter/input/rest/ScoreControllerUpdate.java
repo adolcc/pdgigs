@@ -1,6 +1,6 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.application.service.UpdateScoreRequest;
+import com.pdgigs.infrastructure.adapter.input.rest.dto.request.UpdateScoreRequest;
 import com.pdgigs.domain.port.input.UpdateScoreUseCase;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.UploadScoreResponse;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.UploadScoreMapper;

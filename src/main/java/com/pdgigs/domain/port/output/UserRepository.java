@@ -11,4 +11,10 @@ public interface UserRepository {
     Mono<Boolean> existsByEmail(String email);
     Mono<Void> deleteById(String id);
     Flux<User> findAll();
+
+    default Mono<Void> delete(User user) {
+        return deleteById(user.id());
+    }
+
+    Mono<Void> deleteAll();
 }

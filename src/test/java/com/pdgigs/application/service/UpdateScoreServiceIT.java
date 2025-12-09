@@ -77,14 +77,12 @@ public class UpdateScoreServiceIT {
 
     @BeforeEach
     void setup() {
-        // ensure clean state
+
         reactiveMongoTemplate.dropCollection("scores").onErrorResume(e -> Mono.empty()).block();
 
-        // Auth mocks (TestStubsConfig provides defaults but we reinforce here)
         when(jwtTokenProvider.validateToken(anyString())).thenReturn(Mono.just(true));
         when(jwtTokenProvider.extractEmail(anyString())).thenReturn(Mono.just("test@example.com"));
 
-        // user repo default
         User testUser = new User(
                 "user-id",
                 "test@example.com",
@@ -95,8 +93,6 @@ public class UpdateScoreServiceIT {
                 LocalDateTime.now()
         );
         when(userRepository.findByEmail("test@example.com")).thenReturn(Mono.just(testUser));
-
-        // file storage default
         when(fileStoragePort.download(anyString())).thenAnswer(inv -> Mono.just((org.springframework.core.io.Resource) new org.springframework.core.io.ByteArrayResource(pdfBytes)));
     }
 
@@ -112,10 +108,9 @@ public class UpdateScoreServiceIT {
 
     @Test
     void partialUpdate_singleField_updatesOnlyTitle() {
-        // Given
+
         insertScore("S-1", "Melodía", "Bach", "Barroco");
 
-        // When: PATCH only title
         webTestClient.patch()
                 .uri("/api/scores/S-1")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer dummy-token")
@@ -123,7 +118,7 @@ public class UpdateScoreServiceIT {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"title\":\"Concierto\"}")
                 .exchange()
-                // Then
+
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.id").isEqualTo("S-1")
@@ -131,7 +126,6 @@ public class UpdateScoreServiceIT {
                 .jsonPath("$.author").isEqualTo("Bach")
                 .jsonPath("$.musicStyle").isEqualTo("Barroco");
 
-        // also assert persisted state
         Document saved = reactiveMongoTemplate.findById("S-1", Document.class, "scores").block();
         assert saved != null;
         assert "Concierto".equals(saved.getString("title"));
@@ -141,10 +135,9 @@ public class UpdateScoreServiceIT {
 
     @Test
     void partialUpdate_twoFields_updatesAuthorAndStyle_keepsTitle() {
-        // Given
+
         insertScore("S-2", "Melodía", "Bach", "Barroco");
 
-        // When: PATCH author and musicStyle
         webTestClient.patch()
                 .uri("/api/scores/S-2")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer dummy-token")
@@ -152,7 +145,7 @@ public class UpdateScoreServiceIT {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"author\":\"Mozart\",\"musicStyle\":\"Clásico\"}")
                 .exchange()
-                // Then
+
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.id").isEqualTo("S-2")
@@ -169,10 +162,10 @@ public class UpdateScoreServiceIT {
 
     @Test
     void fullUpdate_allFields_areUpdated() {
-        // Given
+
         insertScore("S-3", "Melodía", "Bach", "Barroco");
 
-        // When: PATCH all fields
+
         webTestClient.patch()
                 .uri("/api/scores/S-3")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer dummy-token")
@@ -180,7 +173,7 @@ public class UpdateScoreServiceIT {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"title\":\"Obertura\",\"author\":\"Haydn\",\"musicStyle\":\"Clásico\"}")
                 .exchange()
-                // Then
+
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.id").isEqualTo("S-3")

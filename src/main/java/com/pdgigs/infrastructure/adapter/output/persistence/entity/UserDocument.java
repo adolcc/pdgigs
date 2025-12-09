@@ -3,7 +3,6 @@ package com.pdgigs.infrastructure.adapter.output.persistence.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Data
-//@NoArgsConstructor
 @Getter
 @AllArgsConstructor
 @Document(collection = "users")

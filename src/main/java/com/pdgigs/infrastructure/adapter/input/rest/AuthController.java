@@ -1,50 +1,38 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
-import com.pdgigs.domain.port.input.AuthenticateUserUseCase;
-import com.pdgigs.domain.port.input.RegisterUserUseCase;
-import com.pdgigs.domain.port.output.UserRepository;
+import com.pdgigs.application.service.AuthenticateUserService;
+import com.pdgigs.application.service.RegisterUserService;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.LoginRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.RegisterRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.AuthResponse;
-import com.pdgigs.infrastructure.adapter.input.rest.mapper.UserRestMapper;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import jakarta.validation.Valid;
 
-@Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(path = "/auth")
 @RequiredArgsConstructor
+@Validated
 public class AuthController {
 
-    private final RegisterUserUseCase registerUserUseCase;
-    private final AuthenticateUserUseCase authenticateUserUseCase;
-    private final UserRepository userRepository;
-    private final UserRestMapper userRestMapper;
+    private final RegisterUserService registerUserService;
+    private final AuthenticateUserService authenticateUserService;
 
-    @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        log.info("Register request for email: {}", request.email());
-
-        return registerUserUseCase.registerUser(request.email(), request.name(), request.password())
-                .flatMap(user -> authenticateUserUseCase.authenticate(request.email(), request.password())
-                        .map(token -> new AuthResponse(token, user.email(), user.name(), user.role()))
-                );
+    @Operation(summary = "Register a new user")
+    @PostMapping(path = "/register", consumes = "application/json", produces = "application/json")
+    public Mono<ResponseEntity<Void>> register(@Valid @RequestBody RegisterRequest request) {
+        return registerUserService.registerUser(request.email(), request.name(), request.password())
+                .map(u -> ResponseEntity.status(201).build());
     }
 
-    @PostMapping("/login")
-    public Mono<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        log.info("Login request for email: {}", request.email());
-
-        return authenticateUserUseCase.authenticate(request.email(), request.password())
-                .flatMap(token ->
-                        userRepository.findByEmail(request.email())
-                                .map(user -> new AuthResponse(token, user.email(), user.name(), user.role()))
-                                .switchIfEmpty(Mono.just(new AuthResponse(token, request.email(), null, null)))
-                );
+    @Operation(summary = "Authenticate and get JWT token")
+    @PostMapping(path = "/login", consumes = "application/json", produces = "application/json")
+    public Mono<ResponseEntity<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return authenticateUserService.authenticate(request.email(), request.password())
+                .map(token -> ResponseEntity.ok(new AuthResponse(token)));
     }
 }

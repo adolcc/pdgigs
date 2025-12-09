@@ -21,9 +21,10 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
 
     @Override
     public Mono<String> authenticate(String email, String password) {
-        log.info("Authenticating user: {}", email);
+        String normalizedEmail = email == null ? null : email.toLowerCase().trim();
+        log.info("Authenticating user: {}", normalizedEmail);
 
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmail(normalizedEmail)
                 .switchIfEmpty(Mono.error(UnauthorizedException.invalidCredentials()))
                 .flatMap(user -> passwordEncoder.matches(password, user.password())
                         .flatMap(matches -> {
@@ -33,7 +34,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
                             return jwtTokenProvider.generateToken(user);
                         })
                 )
-                .doOnSuccess(token -> log.info("User authenticated successfully: {}", email))
-                .doOnError(error -> log.error("Authentication failed for: {}", email, error));
+                .doOnSuccess(token -> log.info("User authenticated successfully: {}", normalizedEmail))
+                .doOnError(error -> log.error("Authentication failed for: {}", normalizedEmail, error));
     }
 }

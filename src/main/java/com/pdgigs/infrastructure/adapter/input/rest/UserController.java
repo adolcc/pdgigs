@@ -6,7 +6,6 @@ import com.pdgigs.infrastructure.adapter.input.rest.dto.request.UpdateNameReques
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.AuthWithUserResponse;
 import com.pdgigs.infrastructure.adapter.input.rest.mapper.UserRestMapper;
 import com.pdgigs.domain.model.User;
-import com.pdgigs.domain.port.input.GetUserUseCase;
 import com.pdgigs.domain.port.input.UpdateUserUseCase;
 import com.pdgigs.domain.port.output.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +22,7 @@ import reactor.core.publisher.Mono;
 @Tag(name = "User", description = "User profile and password management")
 public class UserController {
 
-    private final GetUserUseCase getUserUseCase;
+    private final CurrentUserProvider currentUserProvider;
     private final UpdateUserUseCase updateUserUseCase;
     private final UserRestMapper userRestMapper;
     private final JwtTokenProvider jwtTokenProvider;
@@ -33,8 +31,8 @@ public class UserController {
     @PutMapping("/me/name")
     @ResponseStatus(HttpStatus.OK)
     public Mono<AuthWithUserResponse> updateName(@Valid @RequestBody UpdateNameRequest req) {
-        return currentUserId()
-                .flatMap(id -> updateUserUseCase.updateName(id, req.name()))
+        return currentUserProvider.currentUserId()
+                .flatMap(id -> updateUserUseCase.updateNameAs(id, req.name(), id))
                 .flatMap(this::buildAuthWithUserResponse);
     }
 
@@ -42,8 +40,8 @@ public class UserController {
     @PutMapping("/me/email")
     @ResponseStatus(HttpStatus.OK)
     public Mono<AuthWithUserResponse> updateEmail(@Valid @RequestBody UpdateEmailRequest req) {
-        return currentUserId()
-                .flatMap(id -> updateUserUseCase.updateEmail(id, req.email()))
+        return currentUserProvider.currentUserId()
+                .flatMap(id -> updateUserUseCase.updateEmailAs(id, req.email(), id))
                 .flatMap(this::buildAuthWithUserResponse);
     }
 
@@ -51,29 +49,20 @@ public class UserController {
     @PutMapping("/me/password")
     @ResponseStatus(HttpStatus.OK)
     public Mono<AuthWithUserResponse> changePassword(@Valid @RequestBody ChangePasswordRequest req) {
-        return currentUserId()
-                .flatMap(id -> updateUserUseCase.changePassword(id, req.currentPassword(), req.newPassword()))
+        return currentUserProvider.currentUserId()
+                .flatMap(id -> updateUserUseCase.changePasswordAs(id, req.currentPassword(), req.newPassword(), id))
                 .flatMap(this::buildAuthWithUserResponse);
+    }
+
+    @PutMapping("/{id}")
+    public Mono<Void> updateUserById(@PathVariable("id") String id, @Valid @RequestBody UpdateNameRequest req) {
+        return currentUserProvider.currentUserId()
+                .flatMap(callerId -> updateUserUseCase.updateNameAs(id, req.name(), callerId))
+                .then();
     }
 
     private Mono<AuthWithUserResponse> buildAuthWithUserResponse(User user) {
         return jwtTokenProvider.generateToken(user)
                 .map(token -> new AuthWithUserResponse(token, "Bearer", userRestMapper.toResponse(user)));
-    }
-
-    private Mono<String> currentUserId() {
-
-        return ReactiveSecurityContextHolder.getContext()
-                .flatMap(ctx -> {
-                    var auth = ctx.getAuthentication();
-                    if (auth == null) {
-                        return Mono.empty();
-                    }
-                    String email = auth.getName();
-                    if (email == null || email.isBlank()) {
-                        return Mono.empty();
-                    }
-                    return getUserUseCase.getUserByEmail(email).map(User::id);
-                });
     }
 }

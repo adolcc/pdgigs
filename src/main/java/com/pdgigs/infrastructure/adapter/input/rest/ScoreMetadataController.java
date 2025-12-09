@@ -21,9 +21,6 @@ public class ScoreMetadataController {
                 .map(scoreRestMapper::toResponse);
     }
 
-    // Si en el futuro quieres listar todas las partituras, añade findAll() a GetScoreMetadataUseCase
-    // y descomenta / implementa este endpoint:
-    //
     // @GetMapping
     // public Flux<ScoreResponse> getAllScores() {
     //     return getScoreMetadataUseCase.findAll()

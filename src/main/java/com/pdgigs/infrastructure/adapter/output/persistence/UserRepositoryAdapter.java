@@ -50,4 +50,17 @@ public class UserRepositoryAdapter implements UserRepository {
         return mongoRepository.findAll()
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Mono<Void> delete(User user) {
+        if (user == null || user.id() == null) {
+            return Mono.empty();
+        }
+        return deleteById(user.id());
+    }
+
+    @Override
+    public Mono<Void> deleteAll() {
+        return mongoRepository.deleteAll();
+    }
 }

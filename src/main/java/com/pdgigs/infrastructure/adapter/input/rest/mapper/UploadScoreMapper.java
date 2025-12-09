@@ -5,7 +5,7 @@ import com.pdgigs.infrastructure.adapter.input.rest.dto.response.UploadScoreResp
 
 public final class UploadScoreMapper {
 
-    private UploadScoreMapper() { /* util */ }
+    private UploadScoreMapper() { }
 
     public static UploadScoreResponse toResponse(Score score) {
         return new UploadScoreResponse(

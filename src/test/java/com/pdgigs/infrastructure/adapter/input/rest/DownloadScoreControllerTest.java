@@ -1,7 +1,7 @@
-package com.pdgigs.application.service;
+package com.pdgigs.infrastructure.adapter.input.rest;
 
+import com.pdgigs.application.service.ScoreDownloadService;
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.infrastructure.adapter.input.rest.ScoreControllerDownload;
 import com.pdgigs.domain.port.input.GetScoreMetadataUseCase;
 import com.pdgigs.domain.port.input.GetScorePdfUseCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +90,6 @@ class DownloadScoreControllerTest {
         Resource resource = new ByteArrayResource(pdfBytes) {
             @Override
             public long contentLength() {
-                // Simular longitud desconocida en vez de lanzar excepción
                 return -1L;
             }
 
@@ -119,7 +118,6 @@ class DownloadScoreControllerTest {
     @Test
     void downloadScorePdf_whenMetadataMissing_returnsNotFound() {
         when(getScoreMetadataUseCase.findById(eq("P-99"))).thenReturn(Mono.empty());
-        // Removed unnecessary stubbing for getScorePdfUseCase.getPdf("P-99")
 
         webTestClient.get()
                 .uri("/api/scores/P-99/pdf")

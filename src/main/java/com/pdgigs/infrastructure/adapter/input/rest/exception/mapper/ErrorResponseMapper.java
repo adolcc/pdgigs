@@ -4,7 +4,6 @@ import com.pdgigs.domain.exception.DomainException;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
-
 import java.time.LocalDateTime;
 
 public class ErrorResponseMapper {
@@ -23,7 +22,7 @@ public class ErrorResponseMapper {
         if (ex.getErrorCode().equals("VALIDATION_ERROR") && message.startsWith("Validation failed for 'file': ")) {
             int idx = message.indexOf(":");
             if (idx >= 0 && idx + 2 <= message.length()) {
-                message = message.substring(idx + 2); // the reason only
+                message = message.substring(idx + 2);
             }
         }
 

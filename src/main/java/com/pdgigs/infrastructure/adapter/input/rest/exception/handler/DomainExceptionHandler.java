@@ -53,6 +53,12 @@ public class DomainExceptionHandler {
         return writeErrorResponse(ex, HttpStatus.CONFLICT, exchange);
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public Mono<Void> handleForbidden(ForbiddenException ex, ServerWebExchange exchange) {
+        log.warn("Forbidden: {}", ex.getMessage());
+        return writeErrorResponse(ex, HttpStatus.FORBIDDEN, exchange);
+    }
+
     private Mono<Void> writeErrorResponse(DomainException ex, HttpStatus status, ServerWebExchange exchange) {
         try {
             ErrorResponse error = ErrorResponseMapper.fromDomainException(ex, status, exchange);

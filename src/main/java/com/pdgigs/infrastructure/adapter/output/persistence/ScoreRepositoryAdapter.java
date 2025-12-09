@@ -1,6 +1,5 @@
 package com.pdgigs.infrastructure.adapter.output.persistence;
 
-
 import com.pdgigs.domain.model.Score;
 import com.pdgigs.domain.port.output.ScoreRepository;
 import com.pdgigs.infrastructure.adapter.output.persistence.entity.ScoreDocument;
@@ -8,10 +7,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- * Adapter mínimo que implementa el puerto ScoreRepository usando el Mongo reactive repo.
- * Colocar en el mismo paquete que MongoScoreRepository (o en un subpaquete escaneado).
- */
 @Repository
 public class ScoreRepositoryAdapter implements ScoreRepository {
 

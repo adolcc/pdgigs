@@ -14,9 +14,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import java.time.LocalDateTime;
-
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +32,7 @@ class GetScorePdfServiceTest {
     private GetScorePdfService getScorePdfService;
 
     private Score sampleScore;
-    private static final byte[] PDF_BYTES = new byte[]{0x25, 0x50, 0x44, 0x46}; // %PDF
+    private static final byte[] PDF_BYTES = new byte[]{0x25, 0x50, 0x44, 0x46};
 
     @BeforeEach
     void setUp() {
