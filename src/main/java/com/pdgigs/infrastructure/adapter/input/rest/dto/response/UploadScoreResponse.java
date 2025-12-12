@@ -8,5 +8,6 @@ public record UploadScoreResponse(
         String author,
         String musicStyle,
         String filename,
+        String userEmail,
         LocalDateTime createdAt
-) {}
+) { }

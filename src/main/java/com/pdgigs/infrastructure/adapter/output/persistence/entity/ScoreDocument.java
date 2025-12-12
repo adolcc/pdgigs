@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -20,6 +19,7 @@ public class ScoreDocument {
     private String author;
     private String musicStyle;
     private String filename;
+    private String userEmail;
     private LocalDateTime createdAt;
 
     public static ScoreDocument fromDomain(com.pdgigs.domain.model.Score s) {
@@ -30,6 +30,7 @@ public class ScoreDocument {
                 s.author(),
                 s.musicStyle(),
                 s.filename(),
+                s.userEmail(),
                 s.createdAt()
         );
     }
@@ -41,6 +42,7 @@ public class ScoreDocument {
                 author,
                 musicStyle,
                 filename,
+                userEmail,
                 createdAt
         );
     }

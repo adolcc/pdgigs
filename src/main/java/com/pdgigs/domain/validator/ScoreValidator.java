@@ -22,7 +22,7 @@ public class ScoreValidator {
         return Mono.empty();
     }
 
-    public static Mono<Void> validateMetadata(String title, String author, String musicalStyle) {
+    public static Mono<Void> validateMetadata(String title, String author, String musicStyle) {
 
         if (title != null && !title.isEmpty() && title.isBlank()) {
             return Mono.error(ValidationException.required("title"));
@@ -42,13 +42,13 @@ public class ScoreValidator {
             return Mono.error(ValidationException.invalidField("author", reason));
         }
 
-        if (musicalStyle != null && !musicalStyle.isEmpty() && musicalStyle.isBlank()) {
-            return Mono.error(ValidationException.required("musicalStyle"));
+        if (musicStyle != null && !musicStyle.isEmpty() && musicStyle.isBlank()) {
+            return Mono.error(ValidationException.required("musicStyle"));
         }
-        if (musicalStyle != null && musicalStyle.length() > MAX_STYLE_LENGTH) {
+        if (musicStyle != null && musicStyle.length() > MAX_STYLE_LENGTH) {
             String reason = String.format("Musical style is too long (%d characters). Maximum allowed is %d characters",
-                    musicalStyle.length(), MAX_STYLE_LENGTH);
-            return Mono.error(ValidationException.invalidField("musicalStyle", reason));
+                    musicStyle.length(), MAX_STYLE_LENGTH);
+            return Mono.error(ValidationException.invalidField("musicStyle", reason));
         }
 
         return Mono.empty();

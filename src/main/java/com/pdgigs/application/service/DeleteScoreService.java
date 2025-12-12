@@ -21,7 +21,6 @@ public class DeleteScoreService implements DeleteScoreUseCase {
         return scoreRepository.findById(id)
                 .switchIfEmpty(Mono.error(ResourceNotFoundException.score(id)))
                 .flatMap((Score existing) ->
-                        // primero borrar el archivo asociado de forma reactiva, luego eliminar el documento
                         fileStoragePort.delete(existing.filename())
                                 .then(scoreRepository.deleteById(id))
                 );

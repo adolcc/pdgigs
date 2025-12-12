@@ -21,7 +21,6 @@ public class AdminBootstrap implements CommandLineRunner {
         usersFlux
                 .filter(user -> true)
                 .flatMap(user -> {
-
                     return Flux.empty();
                 })
                 .subscribe();

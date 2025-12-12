@@ -42,6 +42,7 @@ class GetScorePdfServiceTest {
                 "Ludwig van Beethoven",
                 "Classical",
                 "stored-file.pdf",
+                "uploader@example.com",
                 LocalDateTime.now()
         );
     }
@@ -79,13 +80,14 @@ class GetScorePdfServiceTest {
     }
 
     @Test
-    void given_score_without_storageid_when_getPdf_then_return_not_found() {
+    void given_score_without_storageid_then_return_not_found() {
         Score sWithoutFile = new Score(
                 "P-43",
                 "Untitled",
                 "Unknown",
                 "",
-                "",
+                "", // filename empty -> no storage id
+                "uploader@example.com",
                 LocalDateTime.now()
         );
         when(scoreRepository.findById(eq("P-43"))).thenReturn(Mono.just(sWithoutFile));

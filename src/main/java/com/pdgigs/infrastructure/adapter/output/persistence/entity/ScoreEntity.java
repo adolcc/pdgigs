@@ -18,7 +18,7 @@ public class ScoreEntity {
     private String id;
     private String title;
     private String author;
-    private String musicalStyle;
+    private String musicStyle;
     private byte[] pdfContent;
     private Long fileSize;
     private String userId;

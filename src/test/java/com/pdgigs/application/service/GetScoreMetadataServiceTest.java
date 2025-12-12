@@ -35,6 +35,7 @@ class GetScoreMetadataServiceTest {
                 "Ludwig van Beethoven",
                 "Classical",
                 "stored-file.pdf",
+                "uploader@example.com",
                 LocalDateTime.now()
         );
     }
@@ -50,6 +51,7 @@ class GetScoreMetadataServiceTest {
                     assertThat(score.author()).isEqualTo("Ludwig van Beethoven");
                     assertThat(score.musicStyle()).isEqualTo("Classical");
                     assertThat(score.filename()).isEqualTo("stored-file.pdf");
+                    assertThat(score.userEmail()).isEqualTo("uploader@example.com");
                 })
                 .verifyComplete();
     }

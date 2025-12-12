@@ -9,6 +9,6 @@ public interface UploadScoreUseCase {
     Mono<Score> upload(FilePart filePart,
                        String title,
                        String author,
-                       String musicalStyle,
+                       String musicStyle,
                        String userId);
 }

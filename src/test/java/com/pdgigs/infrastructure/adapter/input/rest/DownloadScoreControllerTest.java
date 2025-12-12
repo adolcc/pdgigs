@@ -1,9 +1,8 @@
 package com.pdgigs.infrastructure.adapter.input.rest;
 
+import com.pdgigs.application.dto.DownloadableScore;
 import com.pdgigs.application.service.ScoreDownloadService;
 import com.pdgigs.domain.model.Score;
-import com.pdgigs.domain.port.input.GetScoreMetadataUseCase;
-import com.pdgigs.domain.port.input.GetScorePdfUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,9 +14,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
 import java.io.ByteArrayInputStream;
 import java.nio.channels.Channels;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -25,31 +27,30 @@ import static org.mockito.Mockito.*;
 class DownloadScoreControllerTest {
 
     @Mock
-    private GetScorePdfUseCase getScorePdfUseCase;
+    private ScoreDownloadService scoreDownloadService;
 
-    @Mock
-    private GetScoreMetadataUseCase getScoreMetadataUseCase;
-
-    private ScoreControllerDownload controller;
+    private ScoreDownloadController controller;
     private WebTestClient webTestClient;
 
     private final byte[] pdfBytes = "PDF-BYTES-EXAMPLE".getBytes();
 
     @BeforeEach
     void setUp() {
-        ScoreDownloadService scoreDownloadService = new ScoreDownloadService(getScoreMetadataUseCase, getScorePdfUseCase);
-        controller = new ScoreControllerDownload(getScoreMetadataUseCase, scoreDownloadService);
+        controller = new ScoreDownloadController(scoreDownloadService);
         webTestClient = WebTestClient.bindToController(controller).build();
     }
 
     @Test
     void downloadScorePdf_whenExists_returnsPdfAndHeaders() {
-        Score metadata = new Score("P-42",
+        Score metadata = new Score(
+                "P-42",
                 "Symphony No.5",
                 "Ludwig van Beethoven",
                 "Classical",
                 "stored-file.pdf",
-                LocalDateTime.now());
+                "uploader@example.com",
+                LocalDateTime.now()
+        );
 
         Resource resource = new ByteArrayResource(pdfBytes) {
             @Override
@@ -62,8 +63,10 @@ class DownloadScoreControllerTest {
             }
         };
 
-        when(getScoreMetadataUseCase.findById(eq("P-42"))).thenReturn(Mono.just(metadata));
-        when(getScorePdfUseCase.getPdf(eq("P-42"))).thenReturn(Mono.just(resource));
+        // prepare downloadable result that the service returns
+        DownloadableScore downloadable = new DownloadableScore(resource, "stored-file.pdf", Optional.of((long) pdfBytes.length));
+
+        when(scoreDownloadService.prepareDownload(eq("P-42"))).thenReturn(Mono.just(downloadable));
 
         webTestClient.get()
                 .uri("/api/scores/P-42/pdf")
@@ -74,18 +77,21 @@ class DownloadScoreControllerTest {
                 .expectHeader().valueMatches(HttpHeaders.CONTENT_DISPOSITION, ".*stored-file\\.pdf.*")
                 .expectBody(byte[].class).isEqualTo(pdfBytes);
 
-        verify(getScoreMetadataUseCase, times(1)).findById("P-42");
-        verify(getScorePdfUseCase, times(1)).getPdf("P-42");
+        verify(scoreDownloadService, times(1)).prepareDownload("P-42");
+        verifyNoMoreInteractions(scoreDownloadService);
     }
 
     @Test
     void downloadScorePdf_whenContentLengthThrows_returnsPdfAndHeaders() {
-        Score metadata = new Score("P-43",
+        Score metadata = new Score(
+                "P-43",
                 "Another",
                 "Composer",
                 "Style",
                 "file-with-bad-length.pdf",
-                LocalDateTime.now());
+                "uploader@example.com",
+                LocalDateTime.now()
+        );
 
         Resource resource = new ByteArrayResource(pdfBytes) {
             @Override
@@ -99,8 +105,9 @@ class DownloadScoreControllerTest {
             }
         };
 
-        when(getScoreMetadataUseCase.findById(eq("P-43"))).thenReturn(Mono.just(metadata));
-        when(getScorePdfUseCase.getPdf(eq("P-43"))).thenReturn(Mono.just(resource));
+        DownloadableScore downloadable = new DownloadableScore(resource, "file-with-bad-length.pdf", Optional.empty());
+
+        when(scoreDownloadService.prepareDownload(eq("P-43"))).thenReturn(Mono.just(downloadable));
 
         webTestClient.get()
                 .uri("/api/scores/P-43/pdf")
@@ -111,13 +118,13 @@ class DownloadScoreControllerTest {
                 .expectHeader().valueMatches(HttpHeaders.CONTENT_DISPOSITION, ".*file-with-bad-length\\.pdf.*")
                 .expectBody(byte[].class).isEqualTo(pdfBytes);
 
-        verify(getScoreMetadataUseCase, times(1)).findById("P-43");
-        verify(getScorePdfUseCase, times(1)).getPdf("P-43");
+        verify(scoreDownloadService, times(1)).prepareDownload("P-43");
+        verifyNoMoreInteractions(scoreDownloadService);
     }
 
     @Test
-    void downloadScorePdf_whenMetadataMissing_returnsNotFound() {
-        when(getScoreMetadataUseCase.findById(eq("P-99"))).thenReturn(Mono.empty());
+    void downloadScorePdf_whenNotFound_returnsNotFound() {
+        when(scoreDownloadService.prepareDownload(eq("P-99"))).thenReturn(Mono.empty());
 
         webTestClient.get()
                 .uri("/api/scores/P-99/pdf")
@@ -125,7 +132,7 @@ class DownloadScoreControllerTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(getScoreMetadataUseCase, times(1)).findById("P-99");
-        verify(getScorePdfUseCase, never()).getPdf("P-99");
+        verify(scoreDownloadService, times(1)).prepareDownload("P-99");
+        verifyNoMoreInteractions(scoreDownloadService);
     }
 }

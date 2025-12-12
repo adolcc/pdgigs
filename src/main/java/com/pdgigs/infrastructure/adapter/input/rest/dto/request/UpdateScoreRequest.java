@@ -1,14 +1,9 @@
 package com.pdgigs.infrastructure.adapter.input.rest.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Size;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UpdateScoreRequest {
-    private String title;
-    private String author;
-    private String musicStyle;
-}
+public record UpdateScoreRequest(
+        @Size(max = 200) String title,
+        @Size(max = 200) String author,
+        @Size(max = 100) String musicStyle
+) {}

@@ -24,17 +24,14 @@ public class GridFsFileStorageAdapter implements FileStoragePort {
     }
 
     @Override
-    public Mono<jakarta.annotation.Resource> download(String storageId) {
+    public Mono<ReactiveGridFsResource> download(String storageId) {
         try {
             ObjectId objectId = new ObjectId(storageId);
             return gridFsTemplate.findOne(Query.query(Criteria.where("_id").is(objectId)))
-                    .flatMap(gridFsTemplate::getResource)
-                    .map((ReactiveGridFsResource r) -> (jakarta.annotation.Resource) r);
+                    .flatMap(gridFsTemplate::getResource);
         } catch (IllegalArgumentException ex) {
-
             return gridFsTemplate.findOne(Query.query(Criteria.where("filename").is(storageId)))
-                    .flatMap(gridFsTemplate::getResource)
-                    .map((ReactiveGridFsResource r) -> (jakarta.annotation.Resource) r);
+                    .flatMap(gridFsTemplate::getResource);
         }
     }
 
@@ -44,7 +41,6 @@ public class GridFsFileStorageAdapter implements FileStoragePort {
             ObjectId objectId = new ObjectId(storageId);
             return gridFsTemplate.delete(Query.query(Criteria.where("_id").is(objectId)));
         } catch (IllegalArgumentException ex) {
-
             return gridFsTemplate.delete(Query.query(Criteria.where("filename").is(storageId)));
         }
     }

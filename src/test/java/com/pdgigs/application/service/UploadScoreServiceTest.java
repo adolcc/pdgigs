@@ -50,6 +50,7 @@ class UploadScoreServiceTest {
                     s.author(),
                     s.musicStyle(),
                     s.filename(),
+                    s.userEmail(),
                     s.createdAt() == null ? LocalDateTime.now() : s.createdAt()
             );
             return Mono.just(withId);

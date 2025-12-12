@@ -43,6 +43,7 @@ class DeleteScoreServiceTest {
                 "Autor",
                 "Estilo",
                 "stored-file.pdf",
+                "uploader@example.com",
                 LocalDateTime.of(2020,1,1,0,0)
         );
     }

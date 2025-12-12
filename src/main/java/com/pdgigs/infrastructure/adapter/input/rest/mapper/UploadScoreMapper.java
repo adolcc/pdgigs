@@ -14,6 +14,7 @@ public final class UploadScoreMapper {
                 score.author(),
                 score.musicStyle(),
                 score.filename(),
+                score.userEmail(),
                 score.createdAt()
         );
     }

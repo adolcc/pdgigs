@@ -8,10 +8,17 @@ public record Score(
         String author,
         String musicStyle,
         String filename,
+        String userEmail,
         LocalDateTime createdAt
 ) {
-    public Score(String id, String title, String author, String musicStyle, String filename) {
-        this(id, title == null ? "" : title, author == null ? "" : author, musicStyle == null ? "" : musicStyle, filename, LocalDateTime.now());
+    public Score(String id, String title, String author, String musicStyle, String filename, String userEmail) {
+        this(id,
+                title == null ? "" : title,
+                author == null ? "" : author,
+                musicStyle == null ? "" : musicStyle,
+                filename,
+                userEmail,
+                LocalDateTime.now());
     }
 
     public Score {
