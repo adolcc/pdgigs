@@ -29,3 +29,10 @@ app:
 logging:
   level:
     com.pdgigs: DEBUG
+
+aws:
+  s3:
+    region: ${AWS_REGION}
+    bucket-name: ${AWS_BUCKET_NAME}
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}

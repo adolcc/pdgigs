@@ -3,7 +3,6 @@ package com.pdgigs.infrastructure.adapter.input.rest;
 import com.pdgigs.application.service.AuthenticateUserService;
 import com.pdgigs.application.service.RegisterUserService;
 import com.pdgigs.domain.port.output.JwtTokenProvider;
-import com.pdgigs.domain.port.output.UserRepository;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.LoginRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.request.RegisterRequest;
 import com.pdgigs.infrastructure.adapter.input.rest.dto.response.AuthResponse;
@@ -26,13 +25,16 @@ public class AuthController {
     private final RegisterUserService registerUserService;
     private final AuthenticateUserService authenticateUserService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
 
-    @Operation(summary = "Register a new user")
+    @Operation(summary = "Register a new user and return JWT")
     @PostMapping(path = "/register", consumes = "application/json", produces = "application/json")
-    public Mono<ResponseEntity<Void>> register(@Valid @RequestBody RegisterRequest request) {
-        return registerUserService.registerUser(request.email(), request.name(), request.password())
-                .map(u -> ResponseEntity.status(201).build());
+    public Mono<ResponseEntity<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        return registerUserService.registerUserAndGenerateToken(request.email(), request.name(), request.password())
+                .map(authResp -> {
+                    log.info("Registered and returned token for {}", request.email());
+                    return ResponseEntity.status(201).body(authResp);
+                })
+                .doOnError(e -> log.warn("Registration failed: {}", e.getMessage()));
     }
 
     @Operation(summary = "Authenticate and get JWT token")
@@ -51,7 +53,7 @@ public class AuthController {
                                                         return Mono.just(ResponseEntity.ok(new AuthResponse(token)));
                                                     }
 
-                                                    return userRepository.findByEmail(emailFromToken)
+                                                    return registerUserService.findByEmail(emailFromToken)
                                                             .map(user -> {
                                                                 log.info("User found in DB for email {}: role={}", emailFromToken, user.role());
                                                                 return ResponseEntity.ok(AuthResponse.fromTokenAndUser(token, user));

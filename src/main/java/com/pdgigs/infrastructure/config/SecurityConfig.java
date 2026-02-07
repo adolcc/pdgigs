@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .pathMatchers("/admin/**").hasRole("ADMIN")
                         .pathMatchers("/api/scores/**").authenticated()
                         .pathMatchers("/users/**").authenticated()
-                        .anyExchange().authenticated() // ← Seguridad habilitada
+                        .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
