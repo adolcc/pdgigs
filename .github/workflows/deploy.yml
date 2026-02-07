@@ -34,3 +34,4 @@ jobs:
               -e AWS_ACCESS_KEY_ID="${{ secrets.S3_KEY }}" \
               -e AWS_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET }}" \
               pdgigs-backend
+              
