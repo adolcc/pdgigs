@@ -1,0 +1,36 @@
+name: Deploy Backend to AWS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo apt-get update && sudo apt-get install -y git
+            mkdir -p ~/pdgigs-app
+            cd ~/pdgigs-app
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+            docker build -t pdgigs-backend .
+            docker stop pdgigs-container || true
+            docker rm pdgigs-container || true
+            docker run -d -p 8080:8080 --name pdgigs-container \
+              -e SPRING_DATA_MONGODB_URI="${{ secrets.MONGO_URI }}" \
+              -e AWS_ACCESS_KEY_ID="${{ secrets.S3_KEY }}" \
+              -e AWS_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET }}" \
+              pdgigs-backend
