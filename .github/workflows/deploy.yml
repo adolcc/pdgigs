@@ -31,6 +31,8 @@ jobs:
             docker rm pdgigs-container || true
             docker run -d -p 8080:8080 --name pdgigs-container \
               -e SPRING_DATA_MONGODB_URI="${{ secrets.MONGO_URI }}" \
+              -e AWS_REGION="eu-south-2" \
+              -e AWS_BUCKET_NAME="pdgigs-media" \
               -e AWS_ACCESS_KEY_ID="${{ secrets.S3_KEY }}" \
               -e AWS_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET }}" \
               pdgigs-backend
